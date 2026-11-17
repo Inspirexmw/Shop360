@@ -1952,3 +1952,7 @@ html body .topbar .theme-switch:focus-visible {
 }
 @media(max-width:390px){#page-pos .pos-products{grid-template-columns:repeat(2,minmax(0,1fr))}#page-pos .pos-product{padding:9px}#page-pos .pos-product-emoji{width:33px;height:33px;font-size:18px}#page-pos .pos-product-controls{grid-template-columns:minmax(0,1fr) 43px}}
 @media(min-width:721px){#page-pos .pos-cart{transform:none!important;visibility:visible!important}}
+
+/* Finance sub-menu icons (Cashbook, Expenses, Reconciliation, Transfers) */
+.nav-subnav .subnav-ico{width:16px;height:16px;display:inline-grid;place-items:center;flex:none;color:currentColor}
+.nav-subnav .subnav-ico svg{display:block}
