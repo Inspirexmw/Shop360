@@ -1962,3 +1962,59 @@ html body .topbar .theme-switch:focus-visible {
   #page-pos .pos-products,.pos-products,.inventory-product-grid{grid-template-columns:minmax(0,1fr)!important;gap:10px!important}
   #page-pos .pos-product,.inventory-product-grid>*{width:100%;min-width:0;box-sizing:border-box}
 }
+
+/* Compact numbers: Reports profitability card */
+.rp-profit-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));margin-top:6px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--panel)}
+.rp-profit-item{min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:7px;padding:15px 16px}
+.rp-profit-item+.rp-profit-item{border-left:1px solid var(--line)}
+.rp-profit-label{color:var(--muted);font-size:10px;font-weight:600;letter-spacing:.2px;line-height:1.3}
+.rp-profit-value{min-width:0;max-width:100%;color:var(--ink);font-size:clamp(15px,1.8vw,21px);font-weight:700;line-height:1.15;letter-spacing:-.2px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.rp-profit-note{margin-top:auto;color:var(--muted);font-size:10px;line-height:1.35}
+@media(max-width:560px){.rp-profit-item{padding:12px 12px}.rp-profit-value{font-size:16px}.rp-profit-label{font-size:9.5px}}
+
+/* Compact numbers: settings toggle */
+.compact-setting-row .settings-data-copy{flex:1;min-width:0}
+.compact-switch{display:inline-flex;align-items:center;gap:10px;flex:none;border:0;background:transparent;padding:6px 0;color:var(--ink);font-weight:700;font-size:13px}
+.compact-switch-track{position:relative;width:44px;height:24px;border-radius:999px;background:#d5dde6;transition:background .2s}
+.compact-switch-track i{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:transform .2s}
+.compact-switch.is-on .compact-switch-track{background:#28634d}
+.compact-switch.is-on .compact-switch-track i{transform:translateX(20px)}
+.compact-switch:focus-visible{outline:2px solid #28634d;outline-offset:3px;border-radius:8px}
+.rp-profit-card{grid-column:1/-1;min-width:0}
+
+/* Compact figures on summary cards, with full value on hover/focus */
+.fig-compact{cursor:help;outline:none;white-space:nowrap}
+.fig-compact:focus-visible{border-radius:4px;box-shadow:0 0 0 2px rgba(40,99,77,.35)}
+.fig-tip{position:fixed;top:0;left:0;display:none;z-index:4000;pointer-events:none;padding:6px 10px;border-radius:8px;background:#17212f;color:#fff;font:600 12px/1.3 Inter,ui-sans-serif,system-ui,sans-serif;letter-spacing:.1px;white-space:nowrap;box-shadow:0 6px 18px rgba(15,23,42,.22)}
+
+/* Round 2 dark-mode fixes: POS mobile dock and cart heading, receipts, lay-by status pills. */
+:root[data-theme="dark"] body .pos-mobile-dock {background: var(--panel) !important; border-color: var(--line) !important; box-shadow: 0 10px 30px rgba(0,0,0,.45) !important;}
+:root[data-theme="dark"] body .pos-mobile-dock b {color: var(--ink) !important;}
+:root[data-theme="dark"] body .pos-mobile-dock small {color: var(--muted) !important;}
+:root[data-theme="dark"] body .pos-mobile-dock button {background: var(--action) !important; color: var(--on-action) !important;}
+:root[data-theme="dark"] body .pos-cart-heading {background: var(--panel) !important;}
+:root[data-theme="dark"] body .pos-cart-heading h2,
+:root[data-theme="dark"] body .pos-cart-heading .eyebrow {color: var(--ink) !important;}
+:root[data-theme="dark"] body .pos-cart-heading .panel-sub {color: var(--muted) !important;}
+:root[data-theme="dark"] body .pos-checkout {background: var(--action) !important; color: var(--on-action) !important;}
+:root[data-theme="dark"] body .pos-checkout b, :root[data-theme="dark"] body .pos-checkout i, :root[data-theme="dark"] body .pos-checkout span {color: var(--on-action) !important;}
+
+:root[data-theme="dark"] body .receipt, :root[data-theme="dark"] body .receipt * {color: #f1f3f1 !important;}
+:root[data-theme="dark"] body .receipt {background: #1f2321 !important; border-color: #3b4540 !important;}
+:root[data-theme="dark"] body .receipt .muted, :root[data-theme="dark"] body .receipt small {color: #a9b5ae !important;}
+:root[data-theme="dark"] body .receipt hr {border-top-color: #56625c !important;}
+
+:root[data-theme="dark"] body .page span[style*="background:#e8eefb" i] {background:#293642 !important; color:#9bbbe0 !important;}
+:root[data-theme="dark"] body .page span[style*="background:#fde3e3" i] {background:#402d2d !important; color:#e2a2a2 !important;}
+:root[data-theme="dark"] body .page span[style*="background:#eceff3" i],
+:root[data-theme="dark"] body .page span[style*="background:#e8e8ec" i] {background:#343b37 !important; color:#c5cec8 !important;}
+:root[data-theme="dark"] body .page span[style*="background:#fff2da" i],
+:root[data-theme="dark"] body .page span[style*="background:#fff2df" i],
+:root[data-theme="dark"] body .page span[style*="background:#ffedcf" i] {background:#403629 !important; color:#e2b779 !important;}
+:root[data-theme="dark"] body .page span[style*="background:#fce8e8" i] {background:#402d2d !important; color:#e2a2a2 !important;}
+:root[data-theme="dark"] body .page span[style*="background:#e8f4eb" i],
+:root[data-theme="dark"] body .page span[style*="background:#e7f5eb" i] {background:#293b32 !important; color:#91c9a5 !important;}
+:root[data-theme="dark"] body .modal span[style*="background:#e8eefb" i] {background:#293642 !important; color:#9bbbe0 !important;}
+:root[data-theme="dark"] body .modal span[style*="background:#fde3e3" i] {background:#402d2d !important; color:#e2a2a2 !important;}
+:root[data-theme="dark"] body .modal span[style*="background:#eceff3" i] {background:#343b37 !important; color:#c5cec8 !important;}
+:root[data-theme="dark"] body .modal span[style*="background:var(--brand2)" i] {background:#293b32 !important; color:#91c9a5 !important;}
