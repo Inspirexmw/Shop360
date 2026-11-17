@@ -1713,7 +1713,7 @@ html body .nav button.active{color:#fff!important}
 /* Stage 4: mobile-first navigation and compact workspaces. Desktop styling is untouched. */
 .mobile-bottom-nav{display:none}
 @media(max-width:720px){
-  html,body{width:100%;max-width:100%;overflow-x:hidden}
+  html,body{width:100%;max-width:100%;overflow-x:hidden;overflow-x:clip}
   body{padding-bottom:calc(78px + env(safe-area-inset-bottom,0px))}
   .app{display:block!important;min-height:100dvh!important;padding:0!important;margin:0!important;grid-template-columns:minmax(0,1fr)!important;gap:0!important}
   .sidebar{display:none!important}
@@ -2018,3 +2018,8 @@ html body .topbar .theme-switch:focus-visible {
 :root[data-theme="dark"] body .modal span[style*="background:#fde3e3" i] {background:#402d2d !important; color:#e2a2a2 !important;}
 :root[data-theme="dark"] body .modal span[style*="background:#eceff3" i] {background:#343b37 !important; color:#c5cec8 !important;}
 :root[data-theme="dark"] body .modal span[style*="background:var(--brand2)" i] {background:#293b32 !important; color:#91c9a5 !important;}
+
+/* Report period cards: Net sales, Business expenses and Expired write-offs share one row; Profitability spans full width below. */
+#rpCards.report-period-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}
+#rpCards.report-period-kpis>.rp-profit-card{grid-column:1/-1}
+@media(max-width:720px){#rpCards.report-period-kpis{grid-template-columns:1fr!important}}
