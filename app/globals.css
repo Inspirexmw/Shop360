@@ -1956,3 +1956,9 @@ html body .topbar .theme-switch:focus-visible {
 /* Finance sub-menu icons (Cashbook, Expenses, Reconciliation, Transfers) */
 .nav-subnav .subnav-ico{width:16px;height:16px;display:inline-grid;place-items:center;flex:none;color:currentColor}
 .nav-subnav .subnav-ico svg{display:block}
+
+/* Mobile product lists: single full-width column (POS catalogue and inventory) */
+@media(max-width:720px){
+  #page-pos .pos-products,.pos-products,.inventory-product-grid{grid-template-columns:minmax(0,1fr)!important;gap:10px!important}
+  #page-pos .pos-product,.inventory-product-grid>*{width:100%;min-width:0;box-sizing:border-box}
+}
