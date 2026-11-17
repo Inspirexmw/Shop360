@@ -1,0 +1,20 @@
+{
+  "title": "Shop360 — Stage 3.3 Subtle Color Accents · V89 Functional Baseline",
+  "scripts": [
+    {
+      "file": "00.js",
+      "id": null,
+      "chars": 398293
+    },
+    {
+      "file": "01.js",
+      "id": "shop360-stage3-controls",
+      "chars": 4117
+    },
+    {
+      "file": "02.js",
+      "id": "shop360-mobile-navigation-v1",
+      "chars": 3502
+    }
+  ]
+}
