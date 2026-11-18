@@ -229,7 +229,7 @@ function pdfPeriodRun(st,r,mode){
       ['Net cost of goods sold (after returned stock)',money(st.cogs)],
       ['Estimated gross profit',money(st.profit)+(st.net>0?' ('+Math.round(st.profit/st.net*100)+'% of net sales)':''),true],
       ['Operating expenses',money(st.exp)],
-      ['Expired stock write-offs',money(st.stockWriteOffs)],
+      ...(FEATURES.expiry?[['Expired stock write-offs',money(st.stockWriteOffs)]]:[]),
       ['Estimated net profit',money(st.netProfit),true]
     ]);
     pdfSection(c,'Customer payments and cash');
@@ -276,7 +276,7 @@ function pdfPeriodRun(st,r,mode){
       ['Items on hand',String(allPairs())],['Stock value at cost',money(allValue())],
       ['Low-stock variants',String(state.products.reduce((a,p)=>a+p.variants.filter(v=>(+v.shop||0)<=2).length,0))]
     ]);
-    pdfNote(c,'Estimated profit uses the item costs recorded at the time of sale. Returned items that are restored to saleable stock reverse their original recorded cost in the return period, even when the original sale was in an earlier period; this can make net cost of goods sold negative for a period with no new sales. Damaged returns do not recover stock cost. Order extra costs are already inside item costs, so they are not subtracted again. Net profit is gross profit minus business expenses and expired stock write-offs. This is an estimate, not a full accounting report.');
+    pdfNote(c,'Estimated profit uses the item costs recorded at the time of sale. Returned items that are restored to saleable stock reverse their original recorded cost in the return period, even when the original sale was in an earlier period; this can make net cost of goods sold negative for a period with no new sales. Damaged returns do not recover stock cost. Order extra costs are already inside item costs, so they are not subtracted again. Net profit is gross profit minus business expenses. This is an estimate, not a full accounting report.');
     pdfSignature(c);
     pdfFooters(c);
     return {doc:c.doc,filename:pdfSlug(SHOP.name)+'-'+r.type+'-report-'+r.to+'.pdf'};
