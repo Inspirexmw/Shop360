@@ -2023,3 +2023,35 @@ html body .topbar .theme-switch:focus-visible {
 #rpCards.report-period-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}
 #rpCards.report-period-kpis>.rp-profit-card{grid-column:1/-1}
 @media(max-width:720px){#rpCards.report-period-kpis{grid-template-columns:1fr!important}}
+
+/* Stage 5: mobile shell. Full 18-tab scrolling bottom bar, fixed top bar with left title and right bell,
+   bottom-sheet forms with a fixed action footer. Desktop is untouched. */
+/* Discard confirmation (all widths) */
+.m-confirm{position:fixed;inset:0;z-index:1300;display:none;align-items:center;justify-content:center;padding:24px;background:rgba(10,20,18,.45)}
+.m-confirm.show{display:flex}
+.m-confirm-card{width:min(340px,100%);background:var(--panel);color:var(--ink);border-radius:16px;padding:20px 18px 16px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.m-confirm-card h3{margin:0 0 6px;font-size:17px}
+.m-confirm-card p{margin:0 0 16px;color:var(--muted);font-size:13px}
+.m-confirm-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+@media(max-width:720px){
+  .topbar{position:sticky!important;top:0;display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:center!important;height:56px!important;min-height:56px!important;padding:0 8px 0 12px!important;gap:0!important;transition:transform .25s ease,margin-bottom .25s ease;z-index:40}
+  .topbar>div:first-child{grid-column:1;grid-row:1;display:flex;justify-content:flex-start!important;align-items:center;min-width:0;gap:0!important}
+  .topbar .crumb{text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;font-size:13px!important}
+  .topbar .crumb b{font-size:14px}
+  .topbar .crumb .crumb-prefix{display:none}
+  .top-actions{grid-column:2;grid-row:1;justify-content:flex-end!important;gap:0!important}
+  .top-actions .bell{width:40px;height:40px;border-radius:12px}
+  body.m-form-open .topbar{transform:translateY(-100%);margin-bottom:-56px;pointer-events:none}
+
+  /* Forms become bottom sheets: header on top, scrolling body, actions pinned to the bottom.
+     The backdrop is padded so the sheet sits above the bottom bar. */
+  html body .modal-backdrop{padding:0 0 calc(68px + env(safe-area-inset-bottom,0px))!important;align-items:flex-end!important}
+  html body .modal{width:100%!important;max-width:100%!important;height:auto!important;max-height:calc(92dvh - 68px)!important;max-height:calc(92vh - 68px);display:flex!important;flex-direction:column!important;border-radius:18px 18px 0 0!important;padding:0!important;margin:0!important;overflow:hidden!important}
+  html body .modal .modal-head{flex:none;margin:0!important;padding:14px 14px 12px 16px!important;border-bottom:1px solid var(--line)}
+  html body .modal .modal-head h2{font-size:17px!important;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  html body .modal .modal-head .close{flex:none;width:36px;height:36px;display:grid;place-items:center;border-radius:10px;padding:0}
+  html body .modal>#modalBody{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:14px 16px 0!important}
+  html body .modal #modalBody .form-actions{position:sticky;bottom:0;z-index:3;display:flex;gap:8px;margin:16px -16px 0!important;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px))!important;background:var(--panel);border-top:1px solid var(--line);box-shadow:0 -8px 18px rgba(0,0,0,.05)}
+  html body .modal #modalBody .form-actions .btn{flex:1 1 0!important;min-height:44px}
+}
