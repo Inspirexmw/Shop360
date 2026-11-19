@@ -1716,7 +1716,7 @@ html body .nav button.active{color:#fff!important}
 /* Stage 4: mobile-first navigation and compact workspaces. Desktop styling is untouched. */
 .mobile-bottom-nav{display:none}
 @media(max-width:720px){
-  html,body{width:100%;max-width:100%;overflow-x:hidden}
+  html,body{width:100%;max-width:100%;overflow-x:hidden;overflow-x:clip}
   body{padding-bottom:calc(78px + env(safe-area-inset-bottom,0px))}
   .app{display:block!important;min-height:100dvh!important;padding:0!important;margin:0!important;grid-template-columns:minmax(0,1fr)!important;gap:0!important}
   .sidebar{display:none!important}
@@ -1930,11 +1930,11 @@ html body .topbar .theme-switch:focus-visible {
 .pos-cart-close{display:none;width:34px;height:34px;border:1px solid #e5ebe7;border-radius:9px;background:#fff;color:#53665a;font-size:15px;align-items:center;justify-content:center}
 .pos-cart-backdrop{display:none}
 @media(max-width:720px){
-  #page-pos{padding-bottom:94px}
+  #page-pos{padding-bottom:160px}
   #page-pos .pos-layout{display:block}
   #page-pos .pos-catalog{width:100%;margin:0}
   #page-pos .pos-products{grid-template-columns:repeat(2,minmax(0,1fr))}
-  #page-pos .pos-cart{position:fixed;z-index:121;left:0;right:0;bottom:0;top:auto;width:100%;max-height:88dvh;overflow-y:auto;overscroll-behavior:contain;border:1px solid #e3ebe5;border-bottom:0;border-radius:22px 22px 0 0;padding:0 0 env(safe-area-inset-bottom);background:#fff;box-shadow:0 -18px 55px rgba(19,42,29,.2);transform:translateY(105%);visibility:hidden;transition:transform .28s ease,visibility .28s ease}
+  #page-pos .pos-cart{position:fixed;z-index:1003;left:0;right:0;bottom:0;top:auto;width:100%;max-height:88dvh;overflow-y:auto;overscroll-behavior:contain;border:1px solid #e3ebe5;border-bottom:0;border-radius:22px 22px 0 0;padding:0 0 env(safe-area-inset-bottom);background:#fff;box-shadow:0 -18px 55px rgba(19,42,29,.2);transform:translateY(105%);visibility:hidden;transition:transform .28s ease,visibility .28s ease}
   #page-pos.pos-cart-open .pos-cart{transform:translateY(0);visibility:visible}
   #page-pos .pos-cart-heading{position:sticky;top:0;z-index:2;background:#fff;padding:15px 17px;border-radius:22px 22px 0 0}
   #page-pos .pos-cart-close{display:inline-flex}
@@ -1943,11 +1943,10 @@ html body .topbar .theme-switch:focus-visible {
   #page-pos .pos-checkout-fields{padding:0 15px 5px}
   #page-pos .pos-checkout{width:calc(100% - 30px);margin:8px 15px 0;min-height:52px}
   #page-pos .pos-safe-note{padding-bottom:15px}
-  #page-pos .pos-cart-backdrop{display:block;position:fixed;z-index:120;inset:0;border:0;background:rgba(12,25,18,.42);opacity:0;visibility:hidden;transition:opacity .25s ease,visibility .25s ease}
+  #page-pos .pos-cart-backdrop{display:block;position:fixed;z-index:1002;inset:0;border:0;background:rgba(12,25,18,.42);opacity:0;visibility:hidden;transition:opacity .25s ease,visibility .25s ease}
   #page-pos.pos-cart-open .pos-cart-backdrop{opacity:1;visibility:visible}
-  #page-pos .pos-mobile-dock{z-index:119;left:12px;right:12px;bottom:max(10px,env(safe-area-inset-bottom));min-height:60px;padding:9px 10px 9px 15px}
+  #page-pos .pos-mobile-dock{z-index:1001;left:12px;right:12px;bottom:calc(68px + env(safe-area-inset-bottom,0px) + 14px);min-height:60px;padding:9px 10px 9px 15px;box-shadow:0 12px 32px rgba(20,40,33,.22)}
   #page-pos .pos-mobile-dock button{min-height:44px;padding:12px 15px;font-size:11px}
-  #page-pos.pos-cart-open .pos-mobile-dock{opacity:0;pointer-events:none;transform:translateY(12px)}
   #page-pos .pos-product{min-width:0;padding:11px}
   #page-pos .pos-product-controls{grid-template-columns:minmax(0,1fr) 48px}
   #page-pos .pos-product .btn{min-height:42px}
@@ -1956,3 +1955,132 @@ html body .topbar .theme-switch:focus-visible {
 }
 @media(max-width:390px){#page-pos .pos-products{grid-template-columns:repeat(2,minmax(0,1fr))}#page-pos .pos-product{padding:9px}#page-pos .pos-product-emoji{width:33px;height:33px;font-size:18px}#page-pos .pos-product-controls{grid-template-columns:minmax(0,1fr) 43px}}
 @media(min-width:721px){#page-pos .pos-cart{transform:none!important;visibility:visible!important}}
+
+/* Finance sub-menu icons (Cashbook, Expenses, Reconciliation, Transfers) */
+.nav-subnav .subnav-ico{width:16px;height:16px;display:inline-grid;place-items:center;flex:none;color:currentColor}
+.nav-subnav .subnav-ico svg{display:block}
+
+/* Mobile product lists: single full-width column (POS catalogue and inventory) */
+@media(max-width:720px){
+  #page-pos .pos-products,.pos-products,.inventory-product-grid{grid-template-columns:minmax(0,1fr)!important;gap:10px!important}
+  #page-pos .pos-product,.inventory-product-grid>*{width:100%;min-width:0;box-sizing:border-box}
+}
+
+/* Compact numbers: Reports profitability card */
+.rp-profit-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));margin-top:6px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--panel)}
+.rp-profit-item{min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:7px;padding:15px 16px}
+.rp-profit-item+.rp-profit-item{border-left:1px solid var(--line)}
+.rp-profit-label{color:var(--muted);font-size:10px;font-weight:600;letter-spacing:.2px;line-height:1.3}
+.rp-profit-value{min-width:0;max-width:100%;color:var(--ink);font-size:clamp(15px,1.8vw,21px);font-weight:700;line-height:1.15;letter-spacing:-.2px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.rp-profit-note{margin-top:auto;color:var(--muted);font-size:10px;line-height:1.35}
+@media(max-width:560px){.rp-profit-item{padding:12px 12px}.rp-profit-value{font-size:16px}.rp-profit-label{font-size:9.5px}}
+
+/* Compact numbers: settings toggle */
+.compact-setting-row .settings-data-copy{flex:1;min-width:0}
+.compact-switch{display:inline-flex;align-items:center;gap:10px;flex:none;border:0;background:transparent;padding:6px 0;color:var(--ink);font-weight:700;font-size:13px}
+.compact-switch-track{position:relative;width:44px;height:24px;border-radius:999px;background:#d5dde6;transition:background .2s}
+.compact-switch-track i{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:transform .2s}
+.compact-switch.is-on .compact-switch-track{background:#28634d}
+.compact-switch.is-on .compact-switch-track i{transform:translateX(20px)}
+.compact-switch:focus-visible{outline:2px solid #28634d;outline-offset:3px;border-radius:8px}
+.rp-profit-card{grid-column:1/-1;min-width:0}
+
+/* Compact figures on summary cards, with full value on hover/focus */
+.fig-compact{cursor:help;outline:none;white-space:nowrap}
+.fig-compact:focus-visible{border-radius:4px;box-shadow:0 0 0 2px rgba(40,99,77,.35)}
+.fig-tip{position:fixed;top:0;left:0;display:none;z-index:4000;pointer-events:none;padding:6px 10px;border-radius:8px;background:#17212f;color:#fff;font:600 12px/1.3 Inter,ui-sans-serif,system-ui,sans-serif;letter-spacing:.1px;white-space:nowrap;box-shadow:0 6px 18px rgba(15,23,42,.22)}
+
+/* Round 2 dark-mode fixes: POS mobile dock and cart heading, receipts, lay-by status pills. */
+:root[data-theme="dark"] body .pos-mobile-dock {background: var(--panel) !important; border-color: var(--line) !important; box-shadow: 0 10px 30px rgba(0,0,0,.45) !important;}
+:root[data-theme="dark"] body .pos-mobile-dock b {color: var(--ink) !important;}
+:root[data-theme="dark"] body .pos-mobile-dock small {color: var(--muted) !important;}
+:root[data-theme="dark"] body .pos-mobile-dock button {background: var(--action) !important; color: var(--on-action) !important;}
+:root[data-theme="dark"] body .pos-cart-heading {background: var(--panel) !important;}
+:root[data-theme="dark"] body .pos-cart-heading h2,
+:root[data-theme="dark"] body .pos-cart-heading .eyebrow {color: var(--ink) !important;}
+:root[data-theme="dark"] body .pos-cart-heading .panel-sub {color: var(--muted) !important;}
+:root[data-theme="dark"] body .pos-checkout {background: var(--action) !important; color: var(--on-action) !important;}
+:root[data-theme="dark"] body .pos-checkout b, :root[data-theme="dark"] body .pos-checkout i, :root[data-theme="dark"] body .pos-checkout span {color: var(--on-action) !important;}
+
+:root[data-theme="dark"] body .receipt, :root[data-theme="dark"] body .receipt * {color: #f1f3f1 !important;}
+:root[data-theme="dark"] body .receipt {background: #1f2321 !important; border-color: #3b4540 !important;}
+:root[data-theme="dark"] body .receipt .muted, :root[data-theme="dark"] body .receipt small {color: #a9b5ae !important;}
+:root[data-theme="dark"] body .receipt hr {border-top-color: #56625c !important;}
+
+:root[data-theme="dark"] body .page span[style*="background:#e8eefb" i] {background:#293642 !important; color:#9bbbe0 !important;}
+:root[data-theme="dark"] body .page span[style*="background:#fde3e3" i] {background:#402d2d !important; color:#e2a2a2 !important;}
+:root[data-theme="dark"] body .page span[style*="background:#eceff3" i],
+:root[data-theme="dark"] body .page span[style*="background:#e8e8ec" i] {background:#343b37 !important; color:#c5cec8 !important;}
+:root[data-theme="dark"] body .page span[style*="background:#fff2da" i],
+:root[data-theme="dark"] body .page span[style*="background:#fff2df" i],
+:root[data-theme="dark"] body .page span[style*="background:#ffedcf" i] {background:#403629 !important; color:#e2b779 !important;}
+:root[data-theme="dark"] body .page span[style*="background:#fce8e8" i] {background:#402d2d !important; color:#e2a2a2 !important;}
+:root[data-theme="dark"] body .page span[style*="background:#e8f4eb" i],
+:root[data-theme="dark"] body .page span[style*="background:#e7f5eb" i] {background:#293b32 !important; color:#91c9a5 !important;}
+:root[data-theme="dark"] body .modal span[style*="background:#e8eefb" i] {background:#293642 !important; color:#9bbbe0 !important;}
+:root[data-theme="dark"] body .modal span[style*="background:#fde3e3" i] {background:#402d2d !important; color:#e2a2a2 !important;}
+:root[data-theme="dark"] body .modal span[style*="background:#eceff3" i] {background:#343b37 !important; color:#c5cec8 !important;}
+:root[data-theme="dark"] body .modal span[style*="background:var(--brand2)" i] {background:#293b32 !important; color:#91c9a5 !important;}
+
+/* Report period cards: Net sales, Business expenses and Expired write-offs share one row; Profitability spans full width below. */
+#rpCards.report-period-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}
+#rpCards.report-period-kpis>.rp-profit-card{grid-column:1/-1}
+@media(max-width:720px){#rpCards.report-period-kpis{grid-template-columns:1fr!important}}
+
+/* Stage 5: mobile shell. Full 18-tab scrolling bottom bar, fixed top bar with left title and right bell,
+   bottom-sheet forms with a fixed action footer. Desktop is untouched. */
+/* Discard confirmation (all widths) */
+.m-confirm{position:fixed;inset:0;z-index:1300;display:none;align-items:center;justify-content:center;padding:24px;background:rgba(10,20,18,.45)}
+.m-confirm.show{display:flex}
+.m-confirm-card{width:min(340px,100%);background:var(--panel);color:var(--ink);border-radius:16px;padding:20px 18px 16px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.m-confirm-card h3{margin:0 0 6px;font-size:17px}
+.m-confirm-card p{margin:0 0 16px;color:var(--muted);font-size:13px}
+.m-confirm-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+@media(max-width:720px){
+  .topbar{position:sticky!important;top:0;display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:center!important;height:56px!important;min-height:56px!important;padding:0 8px 0 12px!important;gap:0!important;transition:transform .25s ease,margin-bottom .25s ease;z-index:40}
+  .topbar>div:first-child{grid-column:1;grid-row:1;display:flex;justify-content:flex-start!important;align-items:center;min-width:0;gap:0!important}
+  .topbar .crumb{text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;font-size:13px!important}
+  .topbar .crumb b{font-size:14px}
+  .topbar .crumb .crumb-prefix{display:none}
+  .top-actions{grid-column:2;grid-row:1;justify-content:flex-end!important;gap:0!important}
+  .top-actions .bell{width:40px;height:40px;border-radius:12px}
+  body.m-form-open .topbar{transform:translateY(-100%);margin-bottom:-56px;pointer-events:none}
+
+  /* Forms become bottom sheets: header on top, scrolling body, actions pinned to the bottom.
+     The backdrop is padded so the sheet sits above the bottom bar. */
+  html body .modal-backdrop{padding:0 0 calc(68px + env(safe-area-inset-bottom,0px))!important;align-items:flex-end!important}
+  html body .modal{width:100%!important;max-width:100%!important;height:auto!important;max-height:calc(92dvh - 68px)!important;max-height:calc(92vh - 68px);display:flex!important;flex-direction:column!important;border-radius:18px 18px 0 0!important;padding:0!important;margin:0!important;overflow:hidden!important}
+  html body .modal .modal-head{flex:none;margin:0!important;padding:14px 14px 12px 16px!important;border-bottom:1px solid var(--line)}
+  html body .modal .modal-head h2{font-size:17px!important;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  html body .modal .modal-head .close{flex:none;width:36px;height:36px;display:grid;place-items:center;border-radius:10px;padding:0}
+  html body .modal>#modalBody{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:14px 16px 0!important}
+  html body .modal #modalBody .form-actions{position:sticky;bottom:0;z-index:3;display:flex;gap:8px;margin:16px -16px 0!important;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px))!important;background:var(--panel);border-top:1px solid var(--line);box-shadow:0 -8px 18px rgba(0,0,0,.05)}
+  html body .modal #modalBody .form-actions .btn{flex:1 1 0!important;min-height:44px}
+}
+
+/* POS search: one box in both themes. The wrapper is the only visible frame; the input inside is transparent. Mobile only. */
+@media(max-width:720px){
+  html body .pos-search-wrap{display:flex!important;align-items:center;gap:10px;height:46px;min-height:46px;padding:0 12px 0 14px!important;margin:0 0 12px!important;border:1px solid var(--line)!important;border-radius:12px!important;background:var(--panel)!important;color:var(--muted)!important;box-shadow:none!important;overflow:hidden}
+  html body .pos-search-wrap:focus-within{border-color:var(--brand)!important;outline:2px solid var(--brand2);outline-offset:1px}
+  html body .pos-search-wrap>span{flex:none;font-size:18px;line-height:1;color:var(--muted)!important;background:none!important;border:0!important;padding:0!important;margin:0!important}
+  html body .pos-search-wrap input.pos-search,html body .pos-search-wrap input.search{flex:1 1 auto;min-width:0!important;width:auto!important;height:100%!important;min-height:0!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;background-image:none!important;box-shadow:none!important;outline:none!important;color:var(--ink)!important;font-size:15px!important}
+  html body .pos-search-wrap input.pos-search::placeholder{color:var(--muted);opacity:1}
+  html body .pos-search-wrap kbd{display:none!important}
+  html body .top-actions{display:flex!important;align-items:center;gap:10px!important}
+}
+@media(max-width:720px){
+  :root[data-theme="dark"] body .pos-search-wrap{background:var(--panel)!important;border-color:var(--line)!important}
+  :root[data-theme="dark"] body .pos-search-wrap input.pos-search,:root[data-theme="dark"] body .pos-search-wrap input.search{background:transparent!important;background-color:transparent!important;border:0!important;box-shadow:none!important}
+}
+
+/* Mobile top bar: title centred on the true middle column; bell and theme toggle on the right; symmetric 12px side padding. */
+@media(max-width:720px){
+  html body .topbar{display:grid!important;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)!important;align-items:center!important;padding:0 12px!important;gap:0!important}
+  html body .topbar>div:first-child{grid-column:2!important;grid-row:1!important;display:flex!important;justify-content:center!important;align-items:center!important;min-width:0;gap:0!important}
+  html body .topbar .crumb{text-align:center!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  html body .top-actions{grid-column:3!important;grid-row:1!important;justify-self:end!important;display:flex!important;align-items:center!important;gap:10px!important}
+}
+@media(max-width:720px){
+  html body .topbar{width:auto!important;max-width:none!important;margin-left:10px!important;margin-right:10px!important}
+}
