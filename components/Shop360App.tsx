@@ -12,9 +12,11 @@ let scriptsStarted = false;
 export default function Shop360App({
   markup,
   scripts,
+  user,
 }: {
   markup: string;
   scripts: LegacyScript[];
+  user: { id: string; email: string; name: string; role: string } | null;
 }) {
   useEffect(() => {
     if (scriptsStarted) return;
@@ -25,7 +27,13 @@ export default function Shop360App({
       el.textContent = s.code;
       document.body.appendChild(el);
     }
-  }, [scripts]);
+    if (user) {
+      const nameEl = document.getElementById("userName");
+      const roleEl = document.getElementById("userRole");
+      if (nameEl) nameEl.textContent = user.name;
+      if (roleEl) roleEl.textContent = user.role;
+    }
+  }, [scripts, user]);
 
   return (
     <div

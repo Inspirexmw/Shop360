@@ -15,6 +15,7 @@ export default function FlowManager({
   scripts: { id: string | null; code: string }[];
 }) {
   const [step, setStep] = useState<FlowStep>("load");
+  const [user, setUser] = useState<{ id: string; email: string; name: string; role: string } | null>(null);
 
   useEffect(() => {
     const t = setTimeout(() => setStep("auth"), 1800);
@@ -23,6 +24,6 @@ export default function FlowManager({
 
   if (step === "load") return <LoadScreen />;
   if (step === "auth")
-    return <AuthScreen onLogin={() => setStep("dashboard")} />;
-  return <Shop360App markup={markup} scripts={scripts} />;
+    return <AuthScreen onLogin={(u: { id: string; email: string; name: string; role: string }) => { setUser(u); setStep("dashboard"); }} />;
+  return <Shop360App markup={markup} scripts={scripts} user={user} />;
 }

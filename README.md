@@ -16,7 +16,7 @@ npm run build && npm start   # production
 - `legacy/body.html` — the original `<body>` markup with all `<style>` and `<script>` tags removed.
 - `legacy/scripts/*.js` — the three original inline scripts, verbatim, run in original order.
 - `app/layout.tsx` — `<html data-app-version="68">`, `<body data-version="V89" data-stage="3.1">`, page title.
-- `app/page.tsx` — reads the legacy files on the server.
+- `app/page.tsx` — reads the legacy files on the server, renders the load → auth → dashboard flow.
 - `components/Shop360App.tsx` — client component that injects the markup and runs the scripts once after mount.
 
-The app is client-side only (state is kept in `localStorage`, as in the original file).
+The app is connected to a Neon PostgreSQL database. State is persisted server-side via `/api/state`, not `localStorage`.

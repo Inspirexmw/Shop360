@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-export default function AuthScreen({ onLogin }: { onLogin: () => void }) {
+export default function AuthScreen({ onLogin }: { onLogin: (user: { id: string; email: string; name: string; role: string }) => void }) {
   const [tab, setTab] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -24,6 +24,7 @@ export default function AuthScreen({ onLogin }: { onLogin: () => void }) {
         });
         const j = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(j.error || "Sign in failed");
+        onLogin(j.user);
       } else {
         const res = await fetch("/api/auth/signup", {
           method: "POST",
@@ -32,9 +33,9 @@ export default function AuthScreen({ onLogin }: { onLogin: () => void }) {
         });
         const j = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(j.error || "Sign up failed");
+        onLogin(j.user);
       }
 
-      onLogin();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
