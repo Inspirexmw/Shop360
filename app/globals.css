@@ -2084,3 +2084,43 @@ html body .topbar .theme-switch:focus-visible {
 @media(max-width:720px){
   html body .topbar{width:auto!important;max-width:none!important;margin-left:10px!important;margin-right:10px!important}
 }
+
+/* ---- Header business name, avatar button, My Account (added with the account work) ---- */
+html body .header-business{display:none}
+html body .avatar-btn{padding:0;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;border-radius:50%;cursor:pointer;font-weight:700;font-size:12px}
+html body .avatar-btn img{width:100%;height:100%;object-fit:cover;display:block;border-radius:50%}
+html body .avatar-btn:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+
+.account-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}
+.acct-wide{grid-column:1/-1}
+.acct-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;box-shadow:var(--shadow)}
+.acct-card-head h3{margin:0 0 4px}
+.acct-form{display:flex;flex-direction:column;gap:14px;margin-top:14px}
+.acct-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:4px}
+.acct-msg{font-size:12px;color:var(--muted)}
+.acct-msg.ok{color:var(--brand-d)}
+.acct-msg.err{color:#b95e5a}
+.acct-photo{display:flex;align-items:center;gap:18px;margin-top:14px;flex-wrap:wrap}
+.acct-photo-preview{width:96px;height:96px;font-size:28px;flex:0 0 auto;border:0}
+.acct-photo-preview img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}
+.acct-photo-actions{display:flex;gap:10px;flex-wrap:wrap}
+.acct-pref{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-top:14px;flex-wrap:wrap}
+.acct-seg-group{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.acct-seg{padding:8px 16px;background:var(--panel);color:var(--ink);border:0;font-weight:700}
+.acct-seg.is-on{background:var(--brand2);color:var(--brand-d)}
+.acct-pref-more{margin-top:14px;font-size:12px}
+@media(max-width:720px){.account-grid{grid-template-columns:1fr}}
+
+/* Mobile header: [menu, theme] left · business name centred on the whole bar · [bell, avatar] right */
+@media(max-width:720px){
+  html body .topbar{display:flex!important;grid-template-columns:none!important;align-items:center!important;justify-content:flex-start!important;gap:8px!important;position:sticky!important;height:56px!important;min-height:56px!important;padding:0 12px!important;width:auto!important;max-width:none!important;margin:0 10px!important}
+  html body .topbar>div:first-child{display:contents!important}
+  html body .topbar .crumb{display:none!important}
+  html body .topbar .mobile-menu{order:0}
+  html body .topbar .theme-switch{order:1;margin:0!important}
+  html body .topbar .header-business{display:block!important;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);max-width:calc(100% - 212px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700;font-size:14px;line-height:1.2;text-align:center;color:var(--ink);pointer-events:none}
+  html body .topbar .top-actions{display:contents!important}
+  html body .topbar .bell{order:3;margin-left:auto!important}
+  html body .topbar .top-actions .avatar-btn{display:inline-flex!important;order:4;width:36px!important;height:36px!important;min-width:36px}
+  html body .topbar .top-actions > div:last-child{display:none!important}
+}

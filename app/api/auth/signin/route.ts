@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import bcrypt from "bcrypt";
+import { createSession } from "@/lib/auth";
 
 export async function POST(req: Request) {
   try {
@@ -34,6 +35,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
     }
 
+    await createSession(u.id);
     return NextResponse.json({
       ok: true,
       user: { id: u.id, email: u.email, name: u.name, role: u.role },

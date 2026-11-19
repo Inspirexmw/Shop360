@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import bcrypt from "bcrypt";
+import { createSession, uniqueUsername } from "@/lib/auth";
 
 export async function POST(req: Request) {
   try {
@@ -28,13 +29,18 @@ export async function POST(req: Request) {
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
-    await db.insert(users).values({
-      email: email.toLowerCase(),
-      passwordHash,
-      name,
-      role: "owner",
-      active: true,
-    });
+    const [created] = await db
+      .insert(users)
+      .values({
+        email: email.toLowerCase(),
+        passwordHash,
+        name,
+        username: await uniqueUsername(email),
+        role: "owner",
+        active: true,
+      })
+      .returning({ id: users.id });
+    await createSession(created.id);
 
     return NextResponse.json({
       ok: true,

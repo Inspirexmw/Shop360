@@ -20,6 +20,11 @@
       "file": "02.js",
       "id": "shop360-mobile-navigation-v1",
       "chars": 3502
+    },
+    {
+      "file": "03.js",
+      "id": "shop360-account-header-v1",
+      "chars": 0
     }
   ]
 }

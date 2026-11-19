@@ -11,6 +11,7 @@ import {
   index,
   unique,
   primaryKey,
+  jsonb,
 } from "drizzle-orm/pg-core";
 
 export const id = () => ({ id: uuid("id").defaultRandom().primaryKey() });
@@ -504,6 +505,10 @@ export const users = pgTable(
     email: text("email").notNull().unique(),
     passwordHash: text("password_hash").notNull(),
     name: text("name").notNull(),
+    username: text("username").unique(),
+    phone: text("phone"),
+    avatar: text("avatar"),
+    preferences: jsonb("preferences").default({}).notNull(),
     role: text("role").default("owner").notNull(),
     active: boolean("active").default(true).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -511,5 +516,21 @@ export const users = pgTable(
   },
   (t) => ({
     emailIdx: index("users_email_idx").on(t.email),
+  }),
+);
+
+// Server-side sessions. Only a SHA-256 hash of the session token is stored.
+export const sessions = pgTable(
+  "sessions",
+  {
+    tokenHash: text("token_hash").primaryKey(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    expiresAt: timestamp("expires_at").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (t) => ({
+    userIdx: index("sessions_user_idx").on(t.userId),
   }),
 );
