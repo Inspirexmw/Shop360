@@ -1,9 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
-import Shop360App from "@/components/Shop360App";
+import FlowManager from "@/components/FlowManager";
 
-// The original app's markup and scripts, copied verbatim from the Shop360 HTML file.
-// Read once at build/request time on the server.
 const legacyDir = path.join(process.cwd(), "legacy");
 
 export default function Page() {
@@ -18,5 +16,5 @@ export default function Page() {
     code: fs.readFileSync(path.join(legacyDir, "scripts", s.file), "utf-8"),
   }));
 
-  return <Shop360App markup={markup} scripts={scripts} />;
+  return <FlowManager markup={markup} scripts={scripts} />;
 }

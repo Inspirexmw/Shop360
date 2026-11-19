@@ -55,9 +55,81 @@ const fmtDate=d=>new Date(d+'T12:00:00').toLocaleDateString('en-GB',{day:'2-digi
 
 function toast(msg){let t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(window._toastTimer);window._toastTimer=setTimeout(()=>t.classList.remove('show'),3200)}
 let storageWarned=false;
-function persist(){try{localStorage.setItem(KEY,JSON.stringify(state));return true}catch(e){if(!storageWarned){storageWarned=true;try{toast('Browser storage is full or unavailable. Download a backup and avoid closing this tab until your data is safe.')}catch(_){}}return false}}
+let saveVersion=-1;
+let saveQueue=[];
+let savePending=false;
+let saveTimer=null;
+let lastGoodPayload=null;
+function ensureSaveUI(){
+  let el=document.getElementById('shop360-save-status');
+  if(!el){
+    el=document.createElement('div');
+    el.id='shop360-save-status';
+    el.style.cssText='position:fixed;bottom:12px;right:12px;padding:8px 12px;border-radius:10px;font-size:12px;font-weight:600;z-index:10000;pointer-events:none;opacity:0;transition:opacity .2s,transform .2s;transform:translateY(6px);box-shadow:0 4px 12px rgba(0,0,0,.15);';
+    document.body.appendChild(el);
+  }
+  return el;
+}
+function showSaveStatus(kind,msg){
+  const el=ensureSaveUI();
+  const colors={saving:'#2563eb',saved:'#16a34a',error:'#dc2626'};
+  el.textContent=msg;
+  el.style.background=colors[kind]||colors.saving;
+  el.style.color='#fff';
+  el.style.opacity='1';
+  el.style.transform='translateY(0)';
+  clearTimeout(el._hide);
+  if(kind!=='error') el._hide=setTimeout(()=>{el.style.opacity='0';el.style.transform='translateY(6px)';},1200);
+}
+async function flushSave(){
+  if(savePending) return;
+  const payload=saveQueue.pop();
+  if(!payload) return;
+  while(saveQueue.length>0) saveQueue.pop();
+  savePending=true;
+  try{
+    const r=await fetch('/api/state',{
+      method:'POST',keepalive:true,
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({payload,version:saveVersion})
+    });
+    if(r.status===409){
+      const j=await r.json().catch(()=>({}));
+      showSaveStatus('error','State changed elsewhere — reloading to sync.');
+      saveVersion=typeof j.version==='number'?j.version:saveVersion;
+      await load();
+      renderAll();
+      return;
+    }
+    if(!r.ok) throw new Error('save failed '+r.status);
+    const j=await r.json().catch(()=>({}));
+    saveVersion=typeof j.version==='number'?j.version:(saveVersion+1);
+    lastGoodPayload=payload;
+    showSaveStatus('saved','Saved');
+  }catch(e){
+    showSaveStatus('error','Save failed — rolling back.');
+    if(lastGoodPayload){
+      try{
+        const d=JSON.parse(lastGoodPayload);
+        Object.keys(state).forEach(k=>delete state[k]);
+        Object.assign(state,d);
+      }catch(_){}
+    }
+    renderAll();
+  } finally{
+    savePending=false;
+    if(saveQueue.length>0) setTimeout(flushSave,0);
+  }
+}
+function persist(){
+  try{saveQueue.push(JSON.stringify(state));}catch(e){return false;}
+  showSaveStatus('saving','Saving…');
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(flushSave,250);
+  return true;
+}
 function migrateSingleShop(){state.migrations=Array.isArray(state.migrations)?state.migrations:[];if(state.migrations.includes('stage30-single-shop-v89'))return;state.products.forEach(p=>(p.variants||[]).forEach(v=>{v.shop=Math.max(0,Number(v.shop)||0);v.warehouse=0;v.batches=Array.isArray(v.batches)?v.batches:[];let excess=v.batches.reduce((n,b)=>n+Math.max(0,Number(b.qty)||0),0)-v.shop;for(let i=v.batches.length-1;i>=0&&excess>0;i--){const b=v.batches[i],take=Math.min(excess,Math.max(0,Number(b.qty)||0));b.qty-=take;excess-=take;}v.batches=v.batches.filter(b=>(Number(b.qty)||0)>0)}));state.transfers=(state.transfers||[]).filter(t=>t.id!=='TR-008');state.activity=(state.activity||[]).filter(a=>a.ref!=='TR-008');state.migrations.push('stage30-single-shop-v89');}
-function ensureCustomerCollectionCashbook(){state.cashbook=state.cashbook||[];state.migrations=Array.isArray(state.migrations)?state.migrations:[];if(state.migrations.includes('customer-collections-cashbook-v1'))return;const add=(cid,date,time,method,amount,customer,source)=>{if(!(+amount>0)||state.cashbook.some(e=>e.customerCollectionId===cid))return;state.cashbook.push({id:nextCb(),date,time:time||'',dir:'in',cat:'Customer collection',amount:+amount,method:method||'Cash',note:cid+' · '+(customer||'Walk-in'),customerCollectionId:cid,sourceTransactionId:source||''})};txns().forEach(tx=>{const s=tx.s0||{};const a=+(s.cashReceived!=null?s.cashReceived:((+s.paid||0)-(+s.storeCreditUsed||0)));add('CC-SALE-'+tx.id,tx.date,tx.time,s.depositMethod||s.paymentMethod,a,tx.customer,tx.id)});(state.payments||[]).filter(p=>p.method!=='Customer store credit'&&!p.storeCreditUsed&&+p.amount>0).forEach(p=>add('CC-PAY-'+p.id,p.date,p.time,p.method,p.amount,(txns().find(x=>x.id===p.txnId)||{}).customer,p.txnId));(state.layaways||[]).forEach(l=>(l.payments||[]).forEach((x,i)=>{if(x.method!=='Customer store credit'&&+x.amount>0)add('CC-LAY-'+l.id+'-'+i,x.date,x.time,x.method,x.amount,l.customer,l.id)}));state.migrations.push('customer-collections-cashbook-v1');}function load(){try{const saved=localStorage.getItem(KEY);if(saved){const d=JSON.parse(saved);['products','sales','receivings','transfers','activity','payments','refunds','categories','brands','migrations','layaways','customers','orders','suppliers','stocktakes','cashbook','expCats','recons','exCats','accountTransfers','exchanges','customerCredits'].forEach(k=>{if(Array.isArray(d[k]))state[k]=d[k]});if(d.notifRead&&typeof d.notifRead==='object')state.notifRead=d.notifRead;if(d.settings)Object.assign(SHOP,d.settings);if(SHOP.name==='ShoeStock')SHOP.name='Your Shop Name'}}catch(e){}migrateSingleShop();ensureCustomerCollectionCashbook();persist();} 
+function ensureCustomerCollectionCashbook(){state.cashbook=state.cashbook||[];state.migrations=Array.isArray(state.migrations)?state.migrations:[];if(state.migrations.includes('customer-collections-cashbook-v1'))return;const add=(cid,date,time,method,amount,customer,source)=>{if(!(+amount>0)||state.cashbook.some(e=>e.customerCollectionId===cid))return;state.cashbook.push({id:nextCb(),date,time:time||'',dir:'in',cat:'Customer collection',amount:+amount,method:method||'Cash',note:cid+' · '+(customer||'Walk-in'),customerCollectionId:cid,sourceTransactionId:source||''})};txns().forEach(tx=>{const s=tx.s0||{};const a=+(s.cashReceived!=null?s.cashReceived:((+s.paid||0)-(+s.storeCreditUsed||0)));add('CC-SALE-'+tx.id,tx.date,tx.time,s.depositMethod||s.paymentMethod,a,tx.customer,tx.id)});(state.payments||[]).filter(p=>p.method!=='Customer store credit'&&!p.storeCreditUsed&&+p.amount>0).forEach(p=>add('CC-PAY-'+p.id,p.date,p.time,p.method,p.amount,(txns().find(x=>x.id===p.txnId)||{}).customer,p.txnId));(state.layaways||[]).forEach(l=>(l.payments||[]).forEach((x,i)=>{if(x.method!=='Customer store credit'&&+x.amount>0)add('CC-LAY-'+l.id+'-'+i,x.date,x.time,x.method,x.amount,l.customer,l.id)}));state.migrations.push('customer-collections-cashbook-v1');}async function load(){try{const r=await fetch('/api/state');const j=await r.json();saveVersion=typeof j.version==='number'?j.version:0;lastGoodPayload=j&&j.payload?j.payload:null;if(j&&j.payload){const d=JSON.parse(j.payload);['products','sales','receivings','transfers','activity','payments','refunds','categories','brands','migrations','layaways','customers','orders','suppliers','stocktakes','cashbook','expCats','recons','exCats','accountTransfers','exchanges','customerCredits'].forEach(k=>{if(Array.isArray(d[k]))state[k]=d[k]});if(d.notifRead&&typeof d.notifRead==='object')state.notifRead=d.notifRead;if(d.settings)Object.assign(SHOP,d.settings);if(SHOP.name==='ShoeStock')SHOP.name='Your Shop Name'}}catch(e){}migrateSingleShop();ensureCustomerCollectionCashbook();persist();} 
 
 const layPct=()=>Math.min(100,Math.max(1,+SHOP.layMinPct||50));
 const layPaid=l=>(l.payments||[]).reduce((a,p)=>a+(+p.amount||0),0),layAdjustments=l=>(l.adjustments||[]).reduce((a,x)=>a+(+x.amount||0),0),layApplied=l=>Math.max(0,layPaid(l)+(+l.storeCreditApplied||0)-layAdjustments(l)),layBal=l=>l.status==='Cancelled'?0:Math.max(0,(+l.total||0)-layApplied(l));
@@ -658,7 +730,7 @@ printHTML(`<div class="rep">${logoImg(false)}<h2>${esc(SHOP.name)} · Daily sale
 function openReceipt(id){const t=txns().find(x=>x.id===id);if(!t)return;document.getElementById('modalTitle').textContent='Receipt '+t.id;document.getElementById('modalBody').innerHTML=receiptHTML(t)+`<div class="form-actions"><button class="btn secondary" onclick="closeModal()">Close</button><button class="btn primary" onclick="printReceipt('${t.id}')">🖨 Print receipt</button></div>`;document.getElementById('modalBackdrop').classList.add('show')}
 function printHTML(h){const a=document.getElementById('printArea');a.innerHTML=h;window.print();setTimeout(()=>a.innerHTML='',500)}
 function printReceipt(id){const t=txns().find(x=>x.id===id);if(t)printHTML(receiptHTML(t))}
-function resetDemo(){if(!confirm('Erase ALL data (products, stock, sales, customers, orders) and start completely blank? Download a backup first if you need anything from it. This also removes automatic local snapshots.'))return;try{localStorage.removeItem(KEY);localStorage.removeItem('shopx-snaps');localStorage.removeItem('shopx-last-backup')}catch(e){}location.reload()}
+function resetDemo(){if(!confirm('Erase ALL data (products, stock, sales, customers, orders) and start completely blank? Download a backup first if you need anything from it. This also removes automatic local snapshots.'))return;try{await fetch('/api/state',{method:'DELETE'});localStorage.removeItem('shopx-snaps');localStorage.removeItem('shopx-last-backup')}catch(e){}location.reload()}
 const unitWord=(pid,q)=>{const u=catOf(productById(pid)?.category)?.unit||'pairs';return q===1?u.replace(/s$/,''):u};
 function norm(){layMigrate();state.sales.forEach(s=>{if(s.paymentMethod==='Lay-buy')s.paymentMethod='Lay-by'});const map={Formal:'Formal Shoes',Sandals:'Slides',Heels:'Ladies Heels'};state.products.forEach(p=>{p.category=map[p.category]||p.category;p.model=p.model||p.name;p.variants.forEach(v=>{v.shop=Number(v.shop)||0;v.warehouse=Number(v.warehouse)||0})});if(!Array.isArray(state.categories)||!state.categories.length)state.categories=seedCats();if(!state.migrations.includes('acc')){seedCats().filter(c=>['Socks','Helmets','Gloves','Caps'].includes(c.name)&&!state.categories.some(x=>x.name===c.name)).forEach(c=>state.categories.push(c));state.migrations.push('acc')}state.categories.forEach(c=>c.models=c.models||[]);state.products.forEach(p=>{const c=state.categories.find(x=>x.name===p.category);if(c&&!c.models.some(m=>m.name===p.model))c.models.push({name:p.model,subs:[]});if(p.brand&&p.brand!=='Unbranded'&&!state.brands.includes(p.brand))state.brands.push(p.brand)})}
 const catOf=n=>state.categories.find(c=>c.name===n)||state.categories[0];
@@ -1128,10 +1200,11 @@ function openBackup(){const l=lastBk(),a=snaps();showModal('Backup & restore',`<
 <h3 style="margin:14px 0 6px;font-size:13px">Automatic daily copies kept in this browser</h3><div class="muted" style="font-size:11px;margin-bottom:6px">Taken the first time the system opens each day, so you can undo a mistake. They are lost if the browser data is cleared, so they do not replace the backup file.</div>
 <div class="table-wrap"><table><thead><tr><th>Copy</th><th>Products</th><th>Sale lines</th><th></th></tr></thead><tbody>${a.map((s,i)=>`<tr><td>${fmtDate(s.date)} ${esc(s.time)}${s.tag?' · '+esc(s.tag):''}</td><td>${s.products}</td><td>${s.sales}</td><td><button class="tiny-btn" onclick="restoreSnap(${i})">Restore</button></td></tr>`).join('')||'<tr><td colspan="4" class="empty">No copies yet.</td></tr>'}</tbody></table></div>`)}
 renderAll=(f=>function(){f();backupLabel()})(renderAll);
-const hadSaved=!!(()=>{try{return localStorage.getItem(KEY)}catch(e){return null}})();
 try{if(localStorage.getItem('shop360SidebarCollapsed')==='1'){document.querySelector('.app').classList.add('sidebar-collapsed');const ic=document.getElementById('sidebarCollapseIcon');if(ic)ic.textContent='›';const b=document.querySelector('.sidebar-collapse');if(b){b.title='Expand sidebar';b.setAttribute('aria-label',b.title)}}}catch(e){}
-load();
-
-norm();state.products.forEach(ensureBatches);
-costFix();
-snapDaily();VR=vocabRules();state.categories.forEach(c=>{if(c.emoji)EMOJI[c.name]=c.emoji});startVocab();renderAll();
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='hidden'){
+    clearTimeout(saveTimer);
+    if(saveQueue.length>0) flushSave();
+  }
+});
+(async()=>{await load();norm();state.products.forEach(ensureBatches);costFix();snapDaily();VR=vocabRules();state.categories.forEach(c=>{if(c.emoji)EMOJI[c.name]=c.emoji});startVocab();renderAll();})();
