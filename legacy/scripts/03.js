@@ -10,8 +10,9 @@ function renderHeaderBusiness(){const el=document.getElementById('headerBusiness
 function renderHeaderAvatar(){const btn=document.getElementById('headerAvatar');if(!btn)return;const a=ACCOUNT;btn.innerHTML=a&&a.avatar?`<img alt="" src="${esc(a.avatar)}">`:`<span id="headerAvatarText">${esc(initialsOf(a?a.name:''))}</span>`;
   const n=document.getElementById('userName'),r=document.getElementById('userRole');if(a){if(n)n.textContent=a.name;if(r)r.textContent=a.role}}
 
+function renderGreeting(){const el=document.getElementById('dashGreeting');if(!el)return;const h=new Date().getHours();const part=h<12?'Good morning':h<17?'Good afternoon':'Good evening';const name=ACCOUNT&&String(ACCOUNT.name||ACCOUNT.username||'').trim();el.textContent=name?part+', '+name:part}
 async function loadAccount(){
-  try{const r=await fetch('/api/account',{cache:'no-store'});if(!r.ok)return;const j=await r.json();ACCOUNT=j.user;renderHeaderAvatar();renderHeaderBusiness();
+  try{const r=await fetch('/api/account',{cache:'no-store'});if(!r.ok)return;const j=await r.json();ACCOUNT=j.user;renderHeaderAvatar();renderHeaderBusiness();renderGreeting();
     const t=ACCOUNT.preferences&&ACCOUNT.preferences.theme;if(t&&window.shop360SetTheme)window.shop360SetTheme(t);
     renderAccountPage()}catch(e){}
 }
