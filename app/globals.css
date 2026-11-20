@@ -2124,3 +2124,6 @@ html body .avatar-btn:focus-visible{outline:2px solid var(--brand);outline-offse
   html body .topbar .top-actions .avatar-btn{display:inline-flex!important;order:4;width:36px!important;height:36px!important;min-width:36px}
   html body .topbar .top-actions > div:last-child{display:none!important}
 }
+
+/* Supplier/customer detail modal: keep big money figures inside their stat cards */
+@media (min-width:721px){.modal .stat-num{font-size:min(25px,calc(100cqw / 6.6))!important}}
