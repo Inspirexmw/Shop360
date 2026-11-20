@@ -2127,3 +2127,12 @@ html body .avatar-btn:focus-visible{outline:2px solid var(--brand);outline-offse
 
 /* Supplier/customer detail modal: keep big money figures inside their stat cards */
 @media (min-width:721px){.modal .stat-num{font-size:min(25px,calc(100cqw / 6.6))!important}}
+
+/* Accounts: payment method checklist and account picker */
+.acc-method-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin-top:4px}
+html body .acc-check{display:flex;align-items:center;gap:9px;min-height:44px;margin:0;border:1px solid var(--line);border-radius:9px;padding:9px 11px;font-size:12px;font-weight:600;line-height:1.3;letter-spacing:0;text-transform:none;color:#344154;background:#fff;cursor:pointer;min-width:0;max-width:100%;overflow-wrap:anywhere}
+html body .acc-check input[type=checkbox]{display:inline-block;width:16px!important;height:16px!important;min-width:16px!important;min-height:16px!important;max-width:16px;max-height:16px;flex:0 0 16px;padding:0!important;margin:0!important;border:1px solid #9aa8a0;border-radius:4px;background:#fff!important;box-shadow:none;accent-color:var(--brand);cursor:pointer}
+.acc-pick-slot{display:grid;gap:6px}
+.acc-pick-slot:empty{display:none}
+.acc-pick-slot .field{margin-top:12px}
+@media (max-width:560px){.acc-method-grid{grid-template-columns:1fr 1fr}}
