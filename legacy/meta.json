@@ -25,6 +25,11 @@
       "file": "03.js",
       "id": "shop360-account-header-v1",
       "chars": 0
+    },
+    {
+      "file": "04.js",
+      "id": "shop360-accounts-v1",
+      "chars": 9498
     }
   ]
 }
