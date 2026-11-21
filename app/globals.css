@@ -2146,3 +2146,17 @@ html body .acc-check input[type=checkbox]{display:inline-block;width:16px!import
 @media(max-width:560px){.ava-adj{grid-template-columns:1fr;justify-items:center}.ava-adj-controls{width:100%}}
 .ava-adj .form-actions .btn{white-space:nowrap;min-width:110px}
 @media(max-width:560px){.ava-adj{padding-bottom:64px}.ava-adj .form-actions{position:sticky;bottom:0;background:#fff;margin-top:0;padding:10px 0}}
+
+/* Inventory: Stock health spans the full row (Inventory actions panel removed) */
+.inventory-insight-grid{grid-template-columns:minmax(0,1fr)!important;margin-bottom:30px}
+.inv-health-panel{padding:24px 28px}
+.inv-health-panel .inv-panel-heading h3{font-size:16px}
+.inv-health-panel .inv-panel-heading p{font-size:12px}
+.inv-health-panel .health-bar{height:18px;border-radius:12px;margin:22px 0 16px}
+.inv-health-panel .health-bar i{border-radius:12px}
+.inv-health-panel .health-legend{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;font-size:12px}
+.inv-health-panel .health-legend span{display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:14px 16px;border:1px solid #e9efeb;border-radius:14px;background:#fbfdfb;min-width:0}
+.inv-health-panel .health-legend em{font-style:normal;display:flex;align-items:center;gap:7px;color:#6d7c74;font-size:12px;font-weight:600}
+.inv-health-panel .health-legend strong{font-size:24px;letter-spacing:-.5px;color:var(--ink);line-height:1.1}
+@media(max-width:520px){.inv-health-panel{padding:18px 16px}.inv-health-panel .health-legend{gap:8px}.inv-health-panel .health-legend span{padding:12px 10px}.inv-health-panel .health-legend em{font-size:11px;gap:5px}.inv-health-panel .health-legend strong{font-size:20px}}
+.inv-health-panel .inv-live-dot{white-space:nowrap;flex:none}
