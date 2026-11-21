@@ -9,12 +9,11 @@
     ['daily','Daily'],['receiving','Stock log'],['orders','Orders'],['suppliers','Suppliers'],
     ['customers','Customers'],['layaway','Lay-by'],['finance:cash','Cashbook'],
     ['finance:exp','Expenses'],['finance:rec','Reconcile'],['finance:xfer','Transfers'],
-    ['reports','Reports'],['team','Team'],['settings','Settings'],['backup','Backup']
+    ['reports','Reports'],['team','Team'],['settings','Settings']
   ];
 
   function sourceFor(key){
     if(key==='settings') return sidebar.querySelector('.side-bottom button[onclick*="openSettings"]');
-    if(key==='backup') return sidebar.querySelector('#backupBtn');
     if(key.startsWith('finance:')) return sidebar.querySelector('[data-page="finance"][data-fin-tab="'+key.split(':')[1]+'"]');
     return sidebar.querySelector('.nav button[data-page="'+key+'"]:not([data-fin-tab])');
   }
