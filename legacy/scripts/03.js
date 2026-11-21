@@ -34,8 +34,17 @@ async function acctRequest(url,method,body){
   return j;
 }
 
+// Team & access: lists the signed-in account only. Other members are not in the API yet.
+function renderTeamRows(){
+  const body=document.getElementById('teamRows');if(!body)return;
+  if(!ACCOUNT){body.innerHTML='<tr><td colspan="4"><div class="empty">Loading your account…</div></td></tr>';return}
+  const a=ACCOUNT,role=String(a.role||'');const label=role?role.charAt(0).toUpperCase()+role.slice(1):'Member';
+  body.innerHTML=`<tr class="team-row-link" tabindex="0" role="button" aria-label="Open My Account" onclick="openMyAccount()" onkeydown="if(event.key==='Enter')openMyAccount()"><td><div style="display:flex;align-items:center;gap:10px"><span class="avatar" style="width:32px;height:32px;font-size:12px">${a.avatar?`<img alt="" src="${esc(a.avatar)}">`:esc(initialsOf(a.name))}</span><div><b>${esc(a.name||'Your account')}</b> <span class="badge in-stock" style="margin-left:6px">You</span><div class="muted">${esc(a.email||'')}</div></div></div></td><td>${esc(label)}</td><td>Your own account · profile, photo, password</td><td><span class="badge in-stock">Signed in</span></td></tr>`;
+}
+
 function renderAccountPage(){
   const root=document.getElementById('accountRoot');if(!root||!ACCOUNT)return;
+  renderTeamRows();
   const a=ACCOUNT;
   const photo=a.avatar?`<img alt="" src="${esc(a.avatar)}">`:`<span>${esc(initialsOf(a.name))}</span>`;
   const cur=(a.preferences&&a.preferences.theme)||'light';

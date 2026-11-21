@@ -2136,3 +2136,5 @@ html body .acc-check input[type=checkbox]{display:inline-block;width:16px!import
 .acc-pick-slot:empty{display:none}
 .acc-pick-slot .field{margin-top:12px}
 @media (max-width:560px){.acc-method-grid{grid-template-columns:1fr 1fr}}
+
+.team-row-link{cursor:pointer}.team-row-link:focus-visible{outline:2px solid var(--brand);outline-offset:-2px}
