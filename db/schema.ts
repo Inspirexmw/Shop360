@@ -519,6 +519,32 @@ export const users = pgTable(
   }),
 );
 
+// Append-only audit history. Actor is copied onto each row so history survives user deletion.
+export const auditLog = pgTable(
+  "audit_log",
+  {
+    ...id(),
+    at: timestamp("at").defaultNow().notNull(),
+    actorUserId: uuid("actor_user_id"),
+    actorEmail: text("actor_email"),
+    actorName: text("actor_name"),
+    actorRole: text("actor_role"),
+    action: text("action").notNull(),
+    entityType: text("entity_type"),
+    entityId: text("entity_id"),
+    summary: text("summary"),
+    before: jsonb("before"),
+    after: jsonb("after"),
+    intent: text("intent"),
+  },
+  (t) => ({
+    atIdx: index("audit_log_at_idx").on(t.at),
+    actorIdx: index("audit_log_actor_idx").on(t.actorUserId),
+    entityIdx: index("audit_log_entity_idx").on(t.entityType, t.entityId),
+    actionEmailIdx: index("audit_log_action_email_idx").on(t.action, t.actorEmail, t.at),
+  }),
+);
+
 // Server-side sessions. Only a SHA-256 hash of the session token is stored.
 export const sessions = pgTable(
   "sessions",

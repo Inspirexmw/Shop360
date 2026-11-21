@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { appState } from "@/db/schema";
 import { currentUser } from "@/lib/auth";
+import { prepareAuditStateChange, recordAudit, writeAuditEntries } from "@/lib/audit";
 import { canRunIntent, normalizeRole } from "@/lib/roles";
 
 const STATE_ID = "shop360-blank-test-state-v1";
@@ -62,21 +63,29 @@ export async function POST(req: Request) {
     }
 
     const nextVersion = dbVersion + 1;
+    const actor = { id: user.id, email: user.email, name: user.name, role: user.role };
+    const { payload: stampedPayload, actions } = prepareAuditStateChange(
+      existing.length ? existing[0].payload : null,
+      body.payload,
+      actor,
+      body.intent ?? "general",
+    );
 
     if (existing.length) {
       await db
         .update(appState)
-        .set({ payload: body.payload, version: nextVersion, updatedAt: new Date() })
+        .set({ payload: stampedPayload, version: nextVersion, updatedAt: new Date() })
         .where(eq(appState.id, STATE_ID));
     } else {
       await db.insert(appState).values({
         id: STATE_ID,
-        payload: body.payload,
+        payload: stampedPayload,
         version: nextVersion,
       });
     }
 
-    return NextResponse.json({ ok: true, version: nextVersion });
+    await writeAuditEntries(actions, actor);
+    return NextResponse.json({ ok: true, version: nextVersion, auditEvents: actions.length });
   } catch (e) {
     console.error("POST /api/state error:", e);
     return NextResponse.json({ error: "failed to save state" }, { status: 500 });
@@ -90,6 +99,16 @@ export async function DELETE() {
     return NextResponse.json({ error: "Only an owner can erase all data" }, { status: 403 });
   }
   try {
+    await recordAudit(
+      {
+        action: "data.erase",
+        entityType: "app_state",
+        entityId: STATE_ID,
+        summary: "All business data erased by owner",
+        intent: "data",
+      },
+      { id: user.id, email: user.email, name: user.name, role: user.role },
+    );
     await db.delete(appState).where(eq(appState.id, STATE_ID));
     return NextResponse.json({ ok: true });
   } catch (e) {

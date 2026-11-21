@@ -4,6 +4,7 @@ import bcrypt from "bcrypt";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { currentUser, uniqueUsername } from "@/lib/auth";
+import { recordAudit } from "@/lib/audit";
 import { sendAccountCreatedEmail } from "@/lib/email";
 import { isRole, normalizeRole } from "@/lib/roles";
 
@@ -81,6 +82,17 @@ export async function POST(req: Request) {
       .returning();
 
     const createdUser = publicUser(created);
+    await recordAudit(
+      {
+        action: "users.create",
+        entityType: "users",
+        entityId: createdUser.id,
+        summary: `Created ${createdUser.role} account for ${createdUser.email}`,
+        after: { email: createdUser.email, name: createdUser.name, role: createdUser.role, active: createdUser.active },
+        intent: "users",
+      },
+      { id: auth.user.id, email: auth.user.email, name: auth.user.name, role: auth.user.role },
+    );
     const emailResult = await sendAccountCreatedEmail({
       name: createdUser.name,
       email: createdUser.email,
@@ -132,6 +144,24 @@ export async function PATCH(req: Request) {
       .set({ role: nextRole, active: nextActive, updatedAt: new Date() })
       .where(eq(users.id, target.id))
       .returning();
+
+    const roleChanged = nextRole !== normalizeRole(target.role);
+    const statusChanged = nextActive !== target.active;
+    const changes: string[] = [];
+    if (roleChanged) changes.push(`role ${normalizeRole(target.role)} → ${nextRole}`);
+    if (statusChanged) changes.push(`active ${target.active} → ${nextActive}`);
+    await recordAudit(
+      {
+        action: roleChanged ? "users.role_changed" : statusChanged ? "users.status_changed" : "users.updated",
+        entityType: "users",
+        entityId: updated.id,
+        summary: `${updated.name}: ${changes.join("; ") || "no changes"}`,
+        before: { role: normalizeRole(target.role), active: target.active },
+        after: { role: nextRole, active: nextActive },
+        intent: "users",
+      },
+      { id: auth.user.id, email: auth.user.email, name: auth.user.name, role: auth.user.role },
+    );
 
     return NextResponse.json({ ok: true, user: publicUser(updated) });
   } catch (e) {

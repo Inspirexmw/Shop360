@@ -45,6 +45,12 @@ APP_URL=https://your-shop360-domain            # optional, used for the sign-in 
 
 The create response includes `email: { sent, status }`, and the Team & access toast tells the owner whether to share credentials manually.
 
+### Audit trail and user attribution
+
+Apply `db/migrations/0003_audit_trail.sql` to create the append-only `audit_log` table. Every `/api/state` save is diffed server-side (`lib/audit.ts`): created records receive `userId`, `user`, `createdBy` and `createdAt`; changed records receive `userId`, `updatedBy` and `updatedAt`; and create/update/delete events are written with the authenticated actor (id, email, name, role), timestamp, intent and before/after snapshots. Settings changes, data erasure, sign-in/out, failed logins, password changes and owner user-management actions are also logged. Five failed logins for an email within 15 minutes are rate-limited.
+
+Owners can read the trail with `GET /api/audit?entityType=sales&action=record.create&limit=100`. Audit rows keep actor details even if a user is later deleted, so history cannot be rewritten from the client. The client still supplies the whole state blob; attribution is stamped by the server from the session, not from the request body.
+
 ### Module access matrix
 
 | Module | Owner / Admin | Manager | Cashier | Finance |

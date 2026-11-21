@@ -4,6 +4,7 @@ import bcrypt from "bcrypt";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { currentToken, currentUser, revokeOtherSessions } from "@/lib/auth";
+import { recordAudit } from "@/lib/audit";
 
 export async function POST(req: Request) {
   const me = await currentUser();
@@ -26,5 +27,9 @@ export async function POST(req: Request) {
     .where(eq(users.id, me.id));
   // Sign out every other device; keep this one signed in.
   await revokeOtherSessions(me.id, await currentToken());
+  await recordAudit(
+    { action: "auth.password_changed", entityType: "user", entityId: me.id, summary: "Password changed; other sessions revoked", intent: "auth" },
+    { id: me.id, email: me.email, name: me.name, role: me.role },
+  );
   return NextResponse.json({ ok: true });
 }
