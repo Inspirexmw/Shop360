@@ -2169,3 +2169,9 @@ html body .acc-check input[type=checkbox]{display:inline-block;width:16px!import
 /* Backup & restore: action row with erase */
 .settings-data-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:flex-end}
 .settings-erase-btn{color:#c0392b}
+
+/* Account page: profile photo + sign-out stacked beside security, balanced heights */
+.acct-stack{display:flex;flex-direction:column;gap:16px;min-width:0}
+.acct-stack .acct-photo-card{flex:1}
+.compact-setting-row{margin-top:14px}
+.account-grid .acct-stack{align-self:stretch}

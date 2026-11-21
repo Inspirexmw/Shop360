@@ -61,7 +61,8 @@ function renderAccountPage(){
       <div class="acct-row"><span class="acct-msg" data-acct-msg="info"></span><button class="btn primary">Save personal information</button></div>
     </form>
   </section>
-  <section class="acct-card">
+  <div class="acct-stack">
+  <section class="acct-card acct-photo-card">
     <div class="acct-card-head"><div><h3>Profile photograph</h3><div class="panel-sub">JPEG, PNG or WebP. Cropped to a square and saved at 256 px.</div></div></div>
     <div class="acct-photo">
       <div class="acct-photo-preview avatar">${photo}</div>
@@ -74,6 +75,11 @@ function renderAccountPage(){
     <div class="acct-row"><span class="acct-msg" data-acct-msg="photo"></span></div>
   </section>
   <section class="acct-card">
+    <div class="acct-card-head"><div><h3>Account actions</h3><div class="panel-sub">Sign out of Shop360 on this device.</div></div></div>
+    <button type="button" class="btn secondary" onclick="accountSignOut()">Sign out</button>
+  </section>
+  </div>
+  <section class="acct-card">
     <div class="acct-card-head"><div><h3>Account &amp; security</h3><div class="panel-sub">Changing your password signs you out on your other devices.</div></div></div>
     <form class="acct-form" onsubmit="changeAccountPassword(event)" autocomplete="off">
       <div class="field"><label>CURRENT PASSWORD</label><input name="currentPassword" type="password" required autocomplete="current-password"></div>
@@ -82,10 +88,7 @@ function renderAccountPage(){
       <div class="acct-row"><span class="acct-msg" data-acct-msg="password"></span><button class="btn primary">Change password</button></div>
     </form>
   </section>
-  <section class="acct-card">
-    <div class="acct-card-head"><div><h3>Account actions</h3><div class="panel-sub">Sign out of Shop360 on this device.</div></div></div>
-    <button type="button" class="btn secondary" onclick="accountSignOut()">Sign out</button>
-  </section>`;
+`;
 }
 
 async function saveAccountInfo(e){
