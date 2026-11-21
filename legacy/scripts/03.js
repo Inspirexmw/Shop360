@@ -47,8 +47,6 @@ function renderAccountPage(){
   renderTeamRows();
   const a=ACCOUNT;
   const photo=a.avatar?`<img alt="" src="${esc(a.avatar)}">`:`<span>${esc(initialsOf(a.name))}</span>`;
-  const cur=(a.preferences&&a.preferences.theme)||'light';
-  const pref=(v,label)=>`<button type="button" class="acct-seg${cur===v?' is-on':''}" aria-pressed="${cur===v}" onclick="setThemePref('${v}')">${label}</button>`;
   root.innerHTML=`
   <section class="acct-card acct-wide">
     <div class="acct-card-head"><div><h3>Personal information</h3><div class="panel-sub">Shown on your account. Changing your email changes the address you sign in with.</div></div></div>
@@ -85,11 +83,6 @@ function renderAccountPage(){
     </form>
   </section>
   <section class="acct-card">
-    <div class="acct-card-head"><div><h3>Personal preferences</h3><div class="panel-sub">Saved to your account, so they follow you to any device.</div></div></div>
-    <div class="acct-pref"><div><b>Appearance</b><div class="muted">Light or dark theme</div></div><div class="acct-seg-group">${pref('light','Light')}${pref('dark','Dark')}</div></div>
-    <div class="acct-pref-more muted">More preferences will appear here.</div>
-  </section>
-  <section class="acct-card">
     <div class="acct-card-head"><div><h3>Account actions</h3><div class="panel-sub">Sign out of Shop360 on this device.</div></div></div>
     <button type="button" class="btn secondary" onclick="accountSignOut()">Sign out</button>
   </section>`;
@@ -101,11 +94,6 @@ async function saveAccountInfo(e){
   acctMsg('info','Saving…',true);
   try{const j=await acctRequest('/api/account','PATCH',body);ACCOUNT=j.user;renderHeaderAvatar();renderAccountPage();acctMsg('info','Saved.',true);toast('Personal information saved.')}
   catch(err){acctMsg('info',err.message,false)}
-}
-
-async function setThemePref(t){
-  if(window.shop360SetTheme)window.shop360SetTheme(t);
-  if(window.shop360ThemeChanged)await window.shop360ThemeChanged(t);
 }
 
 // Square crop of the photo. zoom 1 = largest square that fits; px/py in [-1,1] slide the crop window.
