@@ -2,10 +2,14 @@ import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { appState } from "@/db/schema";
+import { currentUser } from "@/lib/auth";
+import { canRunIntent, normalizeRole } from "@/lib/roles";
 
 const STATE_ID = "shop360-blank-test-state-v1";
 
 export async function GET() {
+  const user = await currentUser();
+  if (!user) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
   try {
     const row = await db
       .select({ payload: appState.payload, version: appState.version })
@@ -23,10 +27,16 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  const user = await currentUser();
+  if (!user) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
+
   try {
-    const body = (await req.json()) as { payload?: string; version?: number };
+    const body = (await req.json()) as { payload?: string; version?: number; intent?: string };
     if (typeof body.payload !== "string") {
       return NextResponse.json({ error: "payload required" }, { status: 400 });
+    }
+    if (!canRunIntent(normalizeRole(user.role), body.intent ?? "general")) {
+      return NextResponse.json({ error: "Your role cannot perform this action" }, { status: 403 });
     }
 
     const existing = await db
@@ -74,6 +84,11 @@ export async function POST(req: Request) {
 }
 
 export async function DELETE() {
+  const user = await currentUser();
+  if (!user) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
+  if (normalizeRole(user.role) !== "owner") {
+    return NextResponse.json({ error: "Only an owner can erase all data" }, { status: 403 });
+  }
   try {
     await db.delete(appState).where(eq(appState.id, STATE_ID));
     return NextResponse.json({ ok: true });

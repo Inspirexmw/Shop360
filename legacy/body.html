@@ -169,9 +169,9 @@
   <div class="account-grid" id="accountRoot"><div class="empty">Loading your account…</div></div>
 </section>
 <section id="page-team" class="page hidden">
-  <div class="page-head"><div><div class="eyebrow">ACCESS CONTROL</div><h1>Team & access</h1><p>Preview how owner and employee access could be organised.</p></div><button class="btn primary" onclick="toast('Adding real users requires authentication and a backend in the MVP.')">＋ Invite teammate</button></div>
-  <div class="form-note">Your account is listed below. Other team members are not available in this prototype yet. Select your row to open My Account.</div>
-  <div class="panel table-panel"><div class="table-wrap"><table><thead><tr><th>Team member</th><th>Role</th><th>Access preview</th><th>Status</th></tr></thead><tbody id="teamRows"><tr><td colspan="4"><div class="empty">Loading your account…</div></td></tr></tbody></table></div></div>
+  <div class="page-head"><div><div class="eyebrow">ACCESS CONTROL</div><h1>Team & access</h1><p>Create accounts and assign roles. Only the owner can manage team access.</p></div><button class="btn primary" onclick="openTeamMemberForm()">＋ Add team member</button></div>
+  <div class="form-note">Owner / Admin has full access. Manager runs operations, stock, orders and reports. Cashier uses Point of Sale, sales and customers. Finance manages cashbook, expenses, reconciliation and transfers. Disabled accounts cannot sign in.</div>
+  <div class="panel table-panel"><div class="table-wrap"><table><thead><tr><th>Team member</th><th>Role</th><th>Access</th><th>Status</th><th>Actions</th></tr></thead><tbody id="teamRows"><tr><td colspan="5"><div class="empty">Loading team accounts…</div></td></tr></tbody></table></div></div>
 </section>
 <section id="page-settings" class="page hidden">
   <div class="page-head settings-page-head"><div><div class="eyebrow">BUSINESS CONFIGURATION</div><h1>Settings</h1><p>Manage how your business operates and how Shop360 looks and behaves.</p></div><span class="settings-status"><i></i> Local test configuration</span></div>
@@ -185,12 +185,12 @@
     <button class="settings-card" onclick="openAccounts()"><span class="settings-card-icon teal">▤</span><span class="settings-card-copy"><b>Accounts management</b><small>Create cash, bank and mobile money accounts and choose which payment methods deposit into each.</small><em>Manage accounts <span>→</span></em></span></button>
     <button class="settings-card" onclick="openAppearance()"><span class="settings-card-icon amber">✳</span><span class="settings-card-copy"><b>Appearance</b><small>Upload or remove your business logo.</small><em>Customise workspace <span>→</span></em></span></button>
     <button class="settings-card" onclick="openAlertSettings()"><span class="settings-card-icon rose">♧</span><span class="settings-card-copy"><b>Alerts & notifications</b><small>Low-stock thresholds, lay-by reminders, order delays and margin alerts.</small><em>Manage alerts <span>→</span></em></span></button>
-    <button class="settings-card" onclick="navigate('team')"><span class="settings-card-icon teal">♙</span><span class="settings-card-copy"><b>Team & access</b><small>Review the owner and employee access model for this prototype.</small><em>View team access <span>→</span></em></span></button>
+    <button class="settings-card" onclick="navigate('team')"><span class="settings-card-icon teal">♙</span><span class="settings-card-copy"><b>Team & access</b><small>Create accounts, assign roles and disable access for staff.</small><em>Manage team access <span>→</span></em></span></button>
   </div>
   <div class="settings-data-panel panel compact-setting-row"><div class="settings-data-copy"><span class="settings-card-icon violet">#</span><div><b>Compact numbers</b><p>Shorten large figures across Shop360 to keep your interface clean and readable.</p></div></div><button type="button" class="compact-switch" id="compactNumbersToggle" role="switch" aria-checked="false" onclick="toggleCompactNumbers()"><span class="compact-switch-track"><i></i></span><span id="compactNumbersState">Off</span></button></div>
   <div class="settings-section-head"><div><h2>Data & maintenance</h2><p>Protect your records and manage the data stored in this browser.</p></div></div>
   <div class="settings-data-panel panel"><div class="settings-data-copy"><span class="settings-card-icon blue">↥</span><div><b>Backup & restore</b><p>Download a copy of your business data, restore a previous backup or export records for accounting.</p><p id="backupStatus" class="backup-status" role="status"></p></div></div><div class="settings-data-actions"><button class="btn primary" onclick="openBackup()">Open backup & restore <span>→</span></button><button class="btn secondary settings-erase-btn" onclick="resetDemo()">Erase all data</button></div></div>
-  <div class="settings-demo-note"><b>About this prototype</b><span>Settings and records are saved in this browser only. Team authentication, cloud synchronisation and multi-device access require the production backend. Download regular backups to protect demo data.</span></div>
+  <div class="settings-demo-note"><b>About your workspace</b><span>Business records are saved to your Neon database and sync across devices. Team accounts and permissions are managed by the business owner under Team &amp; access. Download regular backups to protect your data.</span></div>
 </section>
 <div class="footer-note"><span class="appName">Shop360</span> · Connected to your Neon database</div>
 </div></main></div>

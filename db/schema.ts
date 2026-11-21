@@ -16,7 +16,7 @@ import {
 
 export const id = () => ({ id: uuid("id").defaultRandom().primaryKey() });
 
-export const roleEnum = pgEnum("role", ["owner", "employee"]);
+export const roleEnum = pgEnum("role", ["owner", "manager", "cashier", "finance"]);
 
 export const customers = pgTable(
   "customers",

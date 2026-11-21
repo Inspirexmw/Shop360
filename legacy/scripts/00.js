@@ -76,7 +76,7 @@ async function flushSave(){
     const r=await fetch('/api/state',{
       method:'POST',keepalive:true,
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({payload,version:saveVersion})
+      body:JSON.stringify({payload,version:saveVersion,intent:(typeof window!=='undefined'&&window.SHOP360_INTENT)||'general'})
     });
     if(r.status===409){
       const j=await r.json().catch(()=>({}));

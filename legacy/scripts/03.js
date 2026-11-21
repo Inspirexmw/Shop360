@@ -4,11 +4,13 @@ let ACCOUNT=null;
 
 function initialsOf(name){const p=String(name||'').trim().split(/\s+/).filter(Boolean);if(!p.length)return '··';return (p.length===1?p[0].slice(0,2):p[0][0]+p[p.length-1][0]).toUpperCase()}
 
+function roleLabel(role){const labels=window.SHOP360_ROLE_LABELS||{};return labels[role]||String(role||'Member').replace(/^./,c=>c.toUpperCase())}
+
 // Centre header text: the business name from Settings. Called from renderAll().
 function renderHeaderBusiness(){const el=document.getElementById('headerBusiness');if(!el)return;const n=String((typeof SHOP!=='undefined'&&SHOP.name)||'').trim()||'Your business';el.textContent=n;el.title=n}
 
 function renderHeaderAvatar(){const btn=document.getElementById('headerAvatar');if(!btn)return;const a=ACCOUNT;btn.innerHTML=a&&a.avatar?`<img alt="" src="${esc(a.avatar)}">`:`<span id="headerAvatarText">${esc(initialsOf(a?a.name:''))}</span>`;
-  const n=document.getElementById('userName'),r=document.getElementById('userRole');if(a){if(n)n.textContent=a.name;if(r)r.textContent=a.role}}
+  const n=document.getElementById('userName'),r=document.getElementById('userRole');if(a){if(n)n.textContent=a.name;if(r)r.textContent=roleLabel(a.role)}}
 
 function renderGreeting(){const el=document.getElementById('dashGreeting');if(!el)return;const h=new Date().getHours();const part=h<12?'Good morning':h<17?'Good afternoon':'Good evening';const name=ACCOUNT&&String(ACCOUNT.name||ACCOUNT.username||'').trim();el.textContent=name?part+', '+name:part}
 async function loadAccount(){
@@ -34,12 +36,61 @@ async function acctRequest(url,method,body){
   return j;
 }
 
-// Team & access: lists the signed-in account only. Other members are not in the API yet.
-function renderTeamRows(){
+// Team & access: accounts are provisioned and managed by the owner only.
+function accessLabel(role){const map={owner:'Everything, including team and data',manager:'Operations, stock, orders and reports',cashier:'Point of sale, sales and customers',finance:'Cashbook, expenses, reconciliation and transfers'};return map[role]||''}
+function teamRoles(){return (window.SHOP360_RBAC&&window.SHOP360_RBAC.roles)||['owner','manager','cashier','finance']}
+
+async function renderTeamRows(){
   const body=document.getElementById('teamRows');if(!body)return;
-  if(!ACCOUNT){body.innerHTML='<tr><td colspan="4"><div class="empty">Loading your account…</div></td></tr>';return}
-  const a=ACCOUNT,role=String(a.role||'');const label=role?role.charAt(0).toUpperCase()+role.slice(1):'Member';
-  body.innerHTML=`<tr class="team-row-link" tabindex="0" role="button" aria-label="Open My Account" onclick="openMyAccount()" onkeydown="if(event.key==='Enter')openMyAccount()"><td><div><b>${esc(a.name||'Your account')}</b> <span class="badge in-stock" style="margin-left:6px">You</span><div class="muted">${esc(a.email||'')}</div></div></td><td>${esc(label)}</td><td>Your own account · profile, photo, password</td><td><span class="badge in-stock">Signed in</span></td></tr>`;
+  if(window.SHOP360_ROLE!=='owner'){
+    body.innerHTML='<tr><td colspan="5"><div class="empty">Only the business owner can manage team accounts. You can review your own details under My Account.</div></td></tr>';return;
+  }
+  body.innerHTML='<tr><td colspan="5"><div class="empty">Loading team accounts…</div></td></tr>';
+  try{
+    const r=await fetch('/api/admin/users',{cache:'no-store'}),j=await r.json().catch(()=>({}));
+    if(!r.ok)throw new Error(j.error||'Could not load team accounts.');
+    const rows=j.users||[];
+    body.innerHTML=rows.map(u=>{
+      const isSelf=ACCOUNT&&u.id===ACCOUNT.id;
+      const status=u.active?'<span class="badge in-stock">Active</span>':'<span class="badge out">Disabled</span>';
+      const roleCell=isSelf?esc(roleLabel(u.role)):`<select class="tiny-btn" onchange="setTeamRole('${u.id}',this.value)" aria-label="Role for ${esc(u.name)}">${teamRoles().map(r=>`<option value="${esc(r)}" ${r===u.role?'selected':''}>${esc(roleLabel(r))}</option>`).join('')}</select>`;
+      const actions=isSelf?'<span class="muted">Your account</span>':`<button type="button" class="tiny-btn" onclick="toggleTeamMember('${u.id}',${u.active?'false':'true'})">${u.active?'Disable':'Enable'}</button>`;
+      return `<tr><td><div><b>${esc(u.name||'')}</b>${isSelf?' <span class="badge in-stock" style="margin-left:6px">You</span>':''}<div class="muted">${esc(u.email||'')}</div></div></td><td>${roleCell}</td><td class="muted">${esc(accessLabel(u.role))}</td><td>${status}</td><td>${actions}</td></tr>`;
+    }).join('')||'<tr><td colspan="5"><div class="empty">No team accounts yet.</div></td></tr>';
+  }catch(err){body.innerHTML=`<tr><td colspan="5"><div class="empty">${esc(err.message||'Could not load team accounts.')}</div></td></tr>`}
+}
+
+function teamMsg(text,ok){const el=document.getElementById('teamMsg');if(!el)return;el.textContent=text||'';el.className='acct-msg'+(text?(ok?' ok':' err'):'')}
+
+function openTeamMemberForm(){
+  showModal('Add team member',`<form class="acct-form" onsubmit="saveTeamMember(event)">
+    <div class="form-grid">
+      <div class="field"><label>FULL NAME</label><input name="name" required maxlength="80" autocomplete="off"></div>
+      <div class="field"><label>EMAIL</label><input name="email" type="email" required maxlength="254" autocomplete="off"></div>
+      <div class="field"><label>PASSWORD</label><input name="password" type="password" required minlength="6" autocomplete="new-password"></div>
+      <div class="field"><label>ROLE</label><select name="role">${teamRoles().map(r=>`<option value="${esc(r)}">${esc(roleLabel(r))}</option>`).join('')}</select><small class="muted">${esc(accessLabel('cashier'))}</small></div>
+    </div>
+    <div class="acct-row"><span class="acct-msg" id="teamMsg"></span><button class="btn primary">Create account</button></div>
+  </form>`);
+}
+
+async function saveTeamMember(e){
+  e.preventDefault();const f=e.currentTarget,d=new FormData(f);teamMsg('Creating…',true);
+  try{
+    const j=await acctRequest('/api/admin/users','POST',{name:d.get('name'),email:d.get('email'),password:d.get('password'),role:d.get('role')});
+    const note=j.email&&!j.email.sent?(j.email.status==='not_configured'?' Email service is not configured yet — share the credentials manually.':' Welcome email could not be sent — share the credentials manually.'):' A welcome email was sent.';
+    closeModal();toast(j.user.name+' can now sign in.'+note);renderTeamRows();
+  }catch(err){teamMsg(err.message,false)}
+}
+
+async function toggleTeamMember(id,active){
+  try{const j=await acctRequest('/api/admin/users','PATCH',{id,active:active===true||active==='true'});toast(j.user.name+(j.user.active?' enabled.':' disabled.'));renderTeamRows()}
+  catch(err){toast(err.message)}
+}
+
+async function setTeamRole(id,role){
+  try{const j=await acctRequest('/api/admin/users','PATCH',{id,role});toast(j.user.name+' is now '+roleLabel(j.user.role)+'.');renderTeamRows()}
+  catch(err){toast(err.message);renderTeamRows()}
 }
 
 function renderAccountPage(){
@@ -56,7 +107,7 @@ function renderAccountPage(){
         <div class="field"><label>USERNAME</label><input name="username" required minlength="3" maxlength="30" pattern="[A-Za-z0-9._\\-]{3,30}" value="${esc(a.username)}"></div>
         <div class="field"><label>EMAIL</label><input name="email" type="email" required maxlength="254" value="${esc(a.email)}"></div>
         <div class="field"><label>PHONE</label><input name="phone" type="tel" maxlength="30" value="${esc(a.phone)}" placeholder="+265 000 000 000"></div>
-        <div class="field"><label>ROLE</label><input value="${esc(a.role==='owner'?'Owner':'Employee')}" disabled><small class="muted">Set by the business owner under Team &amp; access.</small></div>
+        <div class="field"><label>ROLE</label><input value="${esc(roleLabel(a.role))}" disabled><small class="muted">Set by the business owner under Team &amp; access.</small></div>
       </div>
       <div class="acct-row"><span class="acct-msg" data-acct-msg="info"></span><button class="btn primary">Save personal information</button></div>
     </form>

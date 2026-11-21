@@ -30,6 +30,11 @@
       "file": "04.js",
       "id": "shop360-accounts-v1",
       "chars": 9498
+    },
+    {
+      "file": "05-rbac.js",
+      "id": "shop360-rbac-v1",
+      "chars": 0
     }
   ]
 }

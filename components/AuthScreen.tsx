@@ -3,10 +3,8 @@
 import { useState } from "react";
 
 export default function AuthScreen({ onLogin }: { onLogin: (user: { id: string; email: string; name: string; role: string }) => void }) {
-  const [tab, setTab] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -16,26 +14,14 @@ export default function AuthScreen({ onLogin }: { onLogin: (user: { id: string; 
     setLoading(true);
 
     try {
-      if (tab === "signin") {
-        const res = await fetch("/api/auth/signin", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-        });
-        const j = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(j.error || "Sign in failed");
-        onLogin(j.user);
-      } else {
-        const res = await fetch("/api/auth/signup", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password, name }),
-        });
-        const j = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(j.error || "Sign up failed");
-        onLogin(j.user);
-      }
-
+      const res = await fetch("/api/auth/signin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(j.error || "Sign in failed");
+      onLogin(j.user);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -169,22 +155,6 @@ export default function AuthScreen({ onLogin }: { onLogin: (user: { id: string; 
             placeholder="••••••••"
           />
 
-          {tab === "signup" && (
-            <div style={{ display: "contents" }}>
-              <label style={{ display: "block", fontSize: 10, fontWeight: 800, letterSpacing: 0.15, textTransform: "uppercase", marginBottom: 4, color: s.muted }}>
-                Display name
-              </label>
-              <input
-                type="text"
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                style={loading ? focusInput : inputStyle}
-                placeholder="Your name"
-              />
-            </div>
-          )}
-
           <button
             type="submit"
             disabled={loading}
@@ -206,74 +176,13 @@ export default function AuthScreen({ onLogin }: { onLogin: (user: { id: string; 
               transition: "all .16s",
             }}
           >
-            {loading ? "Signing in…" : tab === "signin" ? "Sign in" : "Create account"}
+            {loading ? "Signing in…" : "Sign in"}
           </button>
         </form>
 
-        <div style={{ marginTop: 32 }}>
-          <p
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 4,
-              fontSize: 10,
-              fontWeight: 600,
-              color: s.muted,
-            }}
-          >
-            {tab === "signin" ? "Don't have an account?" : "Already have an account?"}{" "}
-            <button
-              type="button"
-              onClick={() => setTab(tab === "signin" ? "signup" : "signin")}
-              style={{
-                textDecoration: "underline",
-                textUnderlineOffset: 2,
-                fontWeight: 800,
-                color: s.brand,
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                padding: 0,
-                fontSize: 10,
-              }}
-            >
-              {tab === "signin" ? "Sign up" : "Sign in"}
-            </button>
-          </p>
-          <p
-            style={{
-              marginTop: 22,
-              fontSize: 10,
-              fontWeight: 600,
-              textAlign: "center",
-              color: s.muted,
-            }}
-          >
-            Demo credentials:
-            <span
-              style={{
-                margin: "0 2px",
-                fontWeight: 800,
-                textDecoration: "underline",
-                color: s.brand,
-              }}
-            >
-              demo@shop360.dev
-            </span>
-            /
-            <span
-              style={{
-                margin: "0 2px",
-                fontWeight: 800,
-                textDecoration: "underline",
-                color: s.brand,
-              }}
-            >
-              demo123
-            </span>
-          </p>
-        </div>
+        <p style={{ marginTop: 24, fontSize: 10, fontWeight: 600, textAlign: "center", color: s.muted }}>
+          Accounts are created by your business owner under Team &amp; access. Contact your owner if you need access.
+        </p>
       </div>
     </div>
   );
