@@ -2175,3 +2175,8 @@ html body .acc-check input[type=checkbox]{display:inline-block;width:16px!import
 .acct-stack .acct-photo-card{flex:1}
 .compact-setting-row{margin-top:14px}
 .account-grid .acct-stack{align-self:stretch}
+
+/* Dark mode: Stock health count tiles (were hard-coded light, numbers unreadable) */
+:root[data-theme="dark"] body #page-inventory .inv-health-panel .health-legend span {background:#242a26 !important;border-color:#414744 !important}
+:root[data-theme="dark"] body #page-inventory .inv-health-panel .health-legend em {color:#b9c6be !important}
+:root[data-theme="dark"] body #page-inventory .inv-health-panel .health-legend strong {color:#eef3ef !important}
