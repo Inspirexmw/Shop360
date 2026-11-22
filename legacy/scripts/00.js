@@ -112,7 +112,7 @@ async function flushSave(){
   savePending=true;
   try{
     const r=await fetch('/api/state',{
-      method:'POST',keepalive:true,
+      method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({payload,version:saveVersion,intent:(typeof window!=='undefined'&&window.SHOP360_INTENT)||'general'})
     });
@@ -130,7 +130,9 @@ async function flushSave(){
     lastGoodPayload=payload;
     showSaveStatus('saved','Saved');
   }catch(e){
+    console.error('[shop360] save failed:',e);
     showSaveStatus('error','Save failed — rolling back.');
+    if(typeof toast==='function')toast('Could not save changes. They were rolled back — please retry.');
     if(lastGoodPayload){
       try{
         const d=JSON.parse(lastGoodPayload);

@@ -23,10 +23,11 @@ function actor(user: { id: string; email: string; name: string; role: string; us
   return { id: user.id, email: user.email, name: user.name, role: user.role, username: user.username };
 }
 
-function cleanModules(value: unknown): string[] | null {
+function cleanModules(value: unknown, allowOwnerOnly = false): string[] | null {
   if (!Array.isArray(value) || value.length === 0) return null;
   const valid = value.filter((m): m is string => typeof m === "string" && MODULE_KEYS.includes(m as ModuleKey));
-  if (valid.length !== value.length || valid.some((m) => OWNER_ONLY_MODULES.includes(m as ModuleKey))) return null;
+  const ownerOnly = valid.some((m) => OWNER_ONLY_MODULES.includes(m as ModuleKey));
+  if (valid.length !== value.length || (ownerOnly && !allowOwnerOnly)) return null;
   const unique = [...new Set(valid)];
   return unique.length === value.length && unique.length > 0 ? unique : null;
 }
@@ -110,7 +111,6 @@ export async function PATCH(req: Request) {
     const defs = await getRoleDefinitions();
     const target = defs.find((d) => d.key === id);
     if (!target) return NextResponse.json({ error: "Category not found" }, { status: 404 });
-    if (target.builtIn) return NextResponse.json({ error: "Built-in categories cannot be edited" }, { status: 403 });
 
     const name = body.name !== undefined ? String(body.name).trim() : target.label;
     if (!name || name.length > 60) {
@@ -122,10 +122,11 @@ export async function PATCH(req: Request) {
     if (description && description.length > 200) {
       return NextResponse.json({ error: "Description must be 200 characters or fewer" }, { status: 400 });
     }
-    const modules = body.modules !== undefined ? cleanModules(body.modules) : [...target.modules];
+    let modules = body.modules !== undefined ? cleanModules(body.modules, id === "owner") : [...target.modules];
     if (!modules) {
       return NextResponse.json({ error: "Select at least one valid module" }, { status: 400 });
     }
+    if (id === "owner") modules = [...new Set([...modules, ...OWNER_ONLY_MODULES])];
 
     const existing = await db.select().from(customRoles);
     if (existing.some((r) => r.id !== id && r.name.toLowerCase() === name.toLowerCase())) {
@@ -133,9 +134,12 @@ export async function PATCH(req: Request) {
     }
 
     const [updated] = await db
-      .update(customRoles)
-      .set({ name, description, modules, updatedAt: new Date() })
-      .where(eq(customRoles.id, id))
+      .insert(customRoles)
+      .values({ id, name, description, modules })
+      .onConflictDoUpdate({
+        target: customRoles.id,
+        set: { name, description, modules, updatedAt: new Date() },
+      })
       .returning();
 
     await recordAudit(
@@ -153,7 +157,7 @@ export async function PATCH(req: Request) {
 
     return NextResponse.json({
       ok: true,
-      role: { key: updated.id, label: updated.name, description: updated.description, modules: updated.modules, builtIn: false },
+      role: { key: updated.id, label: updated.name, description: updated.description, modules: updated.modules, builtIn: target.builtIn },
     });
   } catch (e) {
     console.error("PATCH /api/admin/roles error:", e);
@@ -173,14 +177,26 @@ export async function DELETE(req: Request) {
     const defs = await getRoleDefinitions();
     const target = defs.find((d) => d.key === id);
     if (!target) return NextResponse.json({ error: "Category not found" }, { status: 404 });
-    if (target.builtIn) return NextResponse.json({ error: "Built-in categories cannot be deleted" }, { status: 403 });
+    if (id === "owner") {
+      return NextResponse.json({ error: "The Owner / Admin category cannot be deleted" }, { status: 403 });
+    }
 
     const assigned = await db.select({ id: users.id }).from(users).where(eq(users.role, id)).limit(1);
     if (assigned.length) {
       return NextResponse.json({ error: "Move team members off this category before deleting it" }, { status: 409 });
     }
 
-    await db.delete(customRoles).where(eq(customRoles.id, id));
+    if (target.builtIn) {
+      await db
+        .insert(customRoles)
+        .values({ id, name: target.label, description: target.description, modules: [] })
+        .onConflictDoUpdate({
+          target: customRoles.id,
+          set: { name: target.label, description: target.description, modules: [], updatedAt: new Date() },
+        });
+    } else {
+      await db.delete(customRoles).where(eq(customRoles.id, id));
+    }
     await recordAudit(
       {
         action: "roles.delete",

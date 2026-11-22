@@ -56,8 +56,9 @@ async function renderRoleRows(){
     body.innerHTML=rows.map(r=>{
       const mods=r.modules||[];
       const type=r.builtIn?'<span class="badge in-stock">Built-in</span>':'<span class="badge">Custom</span>';
-      const actions=r.builtIn?'<span class="muted">—</span>':`<button type="button" class="tiny-btn" onclick="openRoleForm('${esc(r.key)}')">Edit</button> <button type="button" class="tiny-btn" onclick="deleteRole('${esc(r.key)}')">Delete</button>`;
-      return `<tr><td><b>${esc(r.label)}</b>${r.description?`<div class="muted">${esc(r.description)}</div>`:''}</td><td class="muted">${esc(mods.map(nameOf).join(' · ')||'No modules')}</td><td>${type}</td><td>${actions}</td></tr>`;
+      const actions=`<button type="button" class="tiny-btn" onclick="openRoleForm('${esc(r.key)}')">Edit</button> <button type="button" class="tiny-btn" onclick="deleteRole('${esc(r.key)}')">Delete</button>`;
+      const moduleText=mods.map(nameOf).join(' · ')||'No modules';
+      return `<tr><td><b>${esc(r.label)}</b>${r.description?`<div class="muted">${esc(r.description)}</div>`:''}</td><td class="muted" style="max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(moduleText)}">${esc(moduleText)}</td><td>${type}</td><td>${actions}</td></tr>`;
     }).join('')||'<tr><td colspan="4"><div class="empty">No categories yet.</div></td></tr>';
   }catch(err){body.innerHTML=`<tr><td colspan="4"><div class="empty">${esc(err.message||'Could not load categories.')}</div></td></tr>`}
 }
