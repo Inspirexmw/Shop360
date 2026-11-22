@@ -152,7 +152,7 @@ function pdfFooters(c){
     doc.setPage(i);
     doc.setDrawColor(0);doc.setLineWidth(0.2);doc.line(M,286,W-M,286);
     doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(0);
-    doc.text('Generated from Shop360 records. Amounts in K. Demo prototype, not a fiscal or audited document.',M,290);
+    doc.text('Generated from Shop360 records. Amounts in K.',M,290);
     doc.text('Page '+i+' of '+n,W-M,290,{align:'right'});
   }
 }
@@ -303,7 +303,7 @@ function pdfInventoryRun(mode){
     pdfSection(c,'Stocktake and adjustment audit');
     const audit=(state.stocktakes||[]).flatMap(st=>(st.auditLines||[]).map(x=>{const p=productById(x.productId),v=variantBySku(p,x.sku);return [fmtDate(x.date||st.posted||st.date),p?.name||'Unknown',v?v.color+' · '+v.size:x.sku,String(x.previous),String(x.counted),(x.difference>0?'+':'')+x.difference,money(x.value),x.reason||'',x.user||'-']}));
     pdfTable(c,[{h:'Date',w:22,a:'l'},{h:'Product',w:34,a:'l'},{h:'Variant',w:26,a:'l'},{h:'Before',w:14,a:'r'},{h:'Counted',w:16,a:'r'},{h:'Diff',w:12,a:'r'},{h:'Value',w:20,a:'r'},{h:'Reason',w:22,a:'l'},{h:'User',w:20,a:'l'}],audit,{empty:'No posted stocktake adjustments recorded yet.'});
-    pdfNote(c,'This report reconstructs movements from saved receipts, sales, returns and adjustments. Historical user identity and batch references are only available where the transaction stored them; the prototype does not authenticate staff accounts. Potential gross profit is before operating expenses and assumes all current stock sells at the listed retail price.');
+    pdfNote(c,'This report reconstructs movements from saved receipts, sales, returns and adjustments. Historical user identity and batch references are only available where the transaction stored them. Potential gross profit is before operating expenses and assumes all current stock sells at the listed retail price.');
     pdfSignature(c);
     pdfFooters(c);
     return {doc:c.doc,filename:pdfSlug(SHOP.name)+'-inventory-movements-'+todayKey()+'.pdf'};
