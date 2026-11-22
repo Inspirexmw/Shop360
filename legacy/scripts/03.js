@@ -58,24 +58,30 @@ async function renderRoleRows(){
       const type=r.builtIn?'<span class="badge in-stock">Built-in</span>':'<span class="badge">Custom</span>';
       const actions=`<button type="button" class="tiny-btn" onclick="openRoleForm('${esc(r.key)}')">Edit</button> <button type="button" class="tiny-btn" onclick="deleteRole('${esc(r.key)}')">Delete</button>`;
       const moduleText=mods.map(nameOf).join(' · ')||'No modules';
-      return `<tr><td><b>${esc(r.label)}</b>${r.description?`<div class="muted">${esc(r.description)}</div>`:''}</td><td class="muted" style="max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(moduleText)}">${esc(moduleText)}</td><td>${type}</td><td>${actions}</td></tr>`;
+      return `<tr><td><b>${esc(r.label)}</b>${r.description?`<div class="muted">${esc(r.description)}</div>`:''}</td><td class="role-modules"><span class="mod-badge">${mods.length} of ${all.length}</span><div class="role-mod-list">${esc(moduleText)}</div></td><td>${type}</td><td>${actions}</td></tr>`;
     }).join('')||'<tr><td colspan="4"><div class="empty">No categories yet.</div></td></tr>';
   }catch(err){body.innerHTML=`<tr><td colspan="4"><div class="empty">${esc(err.message||'Could not load categories.')}</div></td></tr>`}
 }
+
+function modGroup(title,items,checked){const on=items.filter(m=>checked.indexOf(m.key)!==-1).length;return `<fieldset class="mod-group"><legend>${esc(title)} <span class="mod-count">${on}/${items.length}</span></legend>${items.map(m=>`<label class="mod-opt"><input type="checkbox" name="modules" value="${esc(m.key)}" ${checked.indexOf(m.key)!==-1?'checked':''}><span>${esc(m.label)}</span></label>`).join('')}</fieldset>`}
 
 function openRoleForm(key){
   const all=(window.SHOP360_RBAC&&window.SHOP360_RBAC.modules)||[];
   const current=key?(window.__shop360RoleDefs||[]).find(r=>r.key===key):null;
   if(key&&!current){toast('Category not found.');return}
   const checked=current?(current.modules||[]):[];
-  const boxes=all.map(m=>`<label style="display:inline-flex;align-items:center;gap:6px;margin:0 16px 8px 0;min-width:200px"><input type="checkbox" name="modules" value="${esc(m.key)}" ${checked.indexOf(m.key)!==-1?'checked':''}> ${esc(m.label)}</label>`).join('');
+  const GROUPS=[['General',['dashboard','account']],['Sales',['pos','sales','daily','customers','layaway']],['Stock',['inventory','receiving','orders','suppliers']],['Finance',['finance','reports']],['Administration',['team','audit','settings']]];
+  const byKey=Object.fromEntries(all.map(m=>[m.key,m]));const placed=new Set();
+  const groupHTML=GROUPS.map(([title,keys])=>{const items=keys.map(k=>byKey[k]).filter(Boolean);items.forEach(m=>placed.add(m.key));return items.length?modGroup(title,items,checked):''}).join('');
+  const rest=all.filter(m=>!placed.has(m.key));
+  const boxes=groupHTML+(rest.length?modGroup('Other',rest,checked):'');
   showModal(current?'Edit category · '+current.label:'New access category',`<form class="acct-form" onsubmit="saveRole(event)">
     <input type="hidden" name="key" value="${esc(key||'')}">
     <div class="form-grid">
       <div class="field"><label>CATEGORY NAME</label><input name="name" required maxlength="60" value="${esc(current?current.label:'')}" autocomplete="off"></div>
       <div class="field"><label>DESCRIPTION</label><input name="description" maxlength="200" value="${esc(current?(current.description||''):'')}" placeholder="What is this category for?" autocomplete="off"></div>
     </div>
-    <div class="field" style="margin-top:10px"><label>MODULES THIS CATEGORY CAN ACCESS</label><div style="display:flex;flex-wrap:wrap;padding:8px 0">${boxes}</div><small class="muted">Owner / Admin always has every module. Write actions follow the modules you select.</small></div>
+    <div class="field mod-field"><label>MODULES THIS CATEGORY CAN ACCESS</label><div class="mod-picker">${boxes}</div><small class="muted">Owner / Admin always has every module. Write actions follow the modules you select.</small></div>
     <div class="acct-row"><span class="acct-msg" id="roleMsg"></span><button class="btn primary">${current?'Save category':'Create category'}</button></div>
   </form>`);
 }
