@@ -7,7 +7,7 @@ function initialsOf(name){const p=String(name||'').trim().split(/\s+/).filter(Bo
 function roleLabel(role){const labels=window.SHOP360_ROLE_LABELS||{};return labels[role]||String(role||'Member').replace(/^./,c=>c.toUpperCase())}
 
 // Centre header text: the business name from Settings. Called from renderAll().
-function renderHeaderBusiness(){const el=document.getElementById('headerBusiness');if(!el)return;const n=String((typeof SHOP!=='undefined'&&SHOP.name)||'').trim()||'Your business';el.textContent=n;el.title=n}
+function renderHeaderBusiness(){const el=document.getElementById('headerBusiness');if(!el)return;const n=String((typeof dashBrand==='function'&&dashBrand())||'').trim()||'Shop360';el.textContent=n;el.title=n}
 
 function renderHeaderAvatar(){const btn=document.getElementById('headerAvatar');if(!btn)return;const a=ACCOUNT;btn.innerHTML=a&&a.avatar?`<img alt="" src="${esc(a.avatar)}">`:`<span id="headerAvatarText">${esc(initialsOf(a?a.name:''))}</span>`;
   const n=document.getElementById('userName'),r=document.getElementById('userRole');if(a){if(n)n.textContent=a.name;if(r)r.textContent=roleLabel(a.role)}}
