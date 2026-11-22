@@ -36,8 +36,8 @@ export async function PATCH(req: Request) {
     patch.name = name;
   }
   if (body.username !== undefined) {
-    const username = String(body.username).trim().toLowerCase();
-    if (!/^[a-z0-9._-]{3,30}$/.test(username))
+    const username = String(body.username).trim();
+    if (!/^[A-Za-z0-9._-]{3,30}$/.test(username))
       return NextResponse.json({ error: "Username must be 3-30 characters: letters, numbers, . _ -" }, { status: 400 });
     patch.username = username;
   }
