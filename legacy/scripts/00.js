@@ -343,7 +343,7 @@ return `<h3 style="margin:4px 0 8px;font-size:14px">Actual results so far</h3><d
 <div class="table-wrap" style="margin-bottom:14px"><table><thead><tr><th>Item</th><th>Received</th><th>Sold</th><th>Left</th><th>Profit so far</th><th>Margin so far</th></tr></thead><tbody>${rows}</tbody></table></div><h3 style="margin:4px 0 8px;font-size:14px">The order as planned</h3>`}
 function dashBrand(){return String(SHOP.dashName||'').trim()||SHOP.appName||'Shop360'}
 function applyBrand(){localize(document.body);const n=dashBrand();document.title=n+' — Retail Workspace';document.querySelectorAll('.appName').forEach(e=>e.textContent=n);const l=document.getElementById('brandLogo');applyTheme();if(l){const lg=SHOP.theme&&SHOP.theme.logo;if(lg){l.innerHTML='<img alt="" src="'+lg+'" style="width:100%;height:100%;object-fit:contain">';l.style.background='#fff'}else{l.textContent=n.trim().charAt(0).toUpperCase()||'S';l.style.background=''}}
-const c=document.getElementById('sideCopy');if(c)c.textContent=n==='Shop360'?'© Shop360 · by InspireX':(SHOP.powered?`© ${n} · Powered by InspireX`:`© ${n}`)}
+const c=document.getElementById('sideCopy');if(c)c.textContent=SHOP.powered?'© Shop360 · Powered by InspireX':'© Shop360'}
 const BIZ={footwear:{one:'pair',many:'pairs'},clothing:{one:'piece',many:'pieces'},general:{one:'item',many:'items'}};
 const capw=w=>w.charAt(0).toUpperCase()+w.slice(1);
 function vocabRules(){const t=SHOP.bizType||'general',b=BIZ[t]||BIZ.general,r=[[/\bpairs\b/g,b.many],[/\bPairs\b/g,capw(b.many)],[/\bPAIRS\b/g,b.many.toUpperCase()],[/\bpair\b/g,b.one],[/\bPair\b/g,capw(b.one)],[/\bPAIR\b/g,b.one.toUpperCase()]];
