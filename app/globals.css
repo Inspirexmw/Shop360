@@ -86,8 +86,10 @@ th{padding-top:10px;padding-bottom:10px}
 #page-dashboard .dashboard-head h1{font-size:29px;letter-spacing:-1.1px;margin:5px 0 4px}
 #page-dashboard .dashboard-head p{font-size:13px;margin:0;color:var(--muted)}
 
-#page-dashboard .dash-sync-tag{display:inline-flex;align-items:center;gap:5px;margin-left:8px;padding:3px 7px;border-radius:20px;background:#fff0d9;color:#996728;font-size:9px;font-weight:800;letter-spacing:.75px;vertical-align:2px}
-#page-dashboard .sync-dot{width:6px;height:6px;border-radius:50%;background:#996728;animation:syncPulse 2s infinite}
+#page-dashboard .dash-sync-tag{display:inline-flex;align-items:center;gap:5px;margin-left:8px;padding:3px 7px;border-radius:20px;background:#e4f5eb;color:#26764f;font-size:9px;font-weight:800;letter-spacing:.75px;vertical-align:2px}
+#page-dashboard .sync-dot{width:6px;height:6px;border-radius:50%;background:#26764f;animation:syncPulse 2s infinite}
+body[data-app-mode="offline"] #page-dashboard .dash-sync-tag{background:#fff0d9;color:#996728}
+body[data-app-mode="offline"] #page-dashboard .sync-dot{background:#996728}
 @keyframes syncPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(1.2)}}
 #page-dashboard .dash-actions{display:flex;gap:9px;flex-wrap:wrap}
 #page-dashboard .dash-actions .btn{display:inline-flex;align-items:center;gap:7px}

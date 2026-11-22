@@ -519,6 +519,22 @@ export const users = pgTable(
   }),
 );
 
+// Owner-defined access categories. Each category stores the module keys it can open.
+export const customRoles = pgTable(
+  "custom_roles",
+  {
+    id: text("id").primaryKey(),
+    name: text("name").notNull().unique(),
+    description: text("description"),
+    modules: jsonb("modules").$type<string[]>().default([]).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (t) => ({
+    nameIdx: index("custom_roles_name_idx").on(t.name),
+  }),
+);
+
 // Append-only audit history. Actor is copied onto each row so history survives user deletion.
 export const auditLog = pgTable(
   "audit_log",
@@ -528,6 +544,7 @@ export const auditLog = pgTable(
     actorUserId: uuid("actor_user_id"),
     actorEmail: text("actor_email"),
     actorName: text("actor_name"),
+    actorUsername: text("actor_username"),
     actorRole: text("actor_role"),
     action: text("action").notNull(),
     entityType: text("entity_type"),

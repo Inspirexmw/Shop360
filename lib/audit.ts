@@ -1,10 +1,10 @@
-import { and, desc, eq, gte } from "drizzle-orm";
+import { and, count, desc, eq, gte, ilike, lte, or } from "drizzle-orm";
 import { db } from "@/db";
 import { auditLog } from "@/db/schema";
 import { currentUser } from "@/lib/auth";
 import { normalizeRole } from "@/lib/roles";
 
-export type AuditActor = { id: string; email: string; name: string; role: string };
+export type AuditActor = { id: string; email: string; name: string; role: string; username?: string | null };
 export type AuditAction = {
   action: string;
   entityType?: string | null;
@@ -49,7 +49,7 @@ const STAMP_FIELDS = ["userId", "createdBy", "createdAt", "updatedBy", "updatedA
 
 export async function auditActorFromSession(): Promise<AuditActor | null> {
   const u = await currentUser();
-  return u ? { id: u.id, email: u.email, name: u.name, role: u.role } : null;
+  return u ? { id: u.id, email: u.email, name: u.name, role: u.role, username: u.username } : null;
 }
 
 function clip(value: unknown): unknown {
@@ -64,6 +64,7 @@ function toRow(action: AuditAction, actor: AuditActor | null): AuditRow {
     actorUserId: actor?.id || null,
     actorEmail: actor?.email ?? null,
     actorName: actor?.name ?? null,
+    actorUsername: actor?.username ?? null,
     actorRole: actor ? normalizeRole(actor.role) : null,
     action: action.action,
     entityType: action.entityType ?? null,
@@ -124,15 +125,16 @@ function withoutStamps(record: Record<string, unknown>): Record<string, unknown>
 }
 
 function stampCreated(record: Record<string, unknown>, actor: AuditActor) {
+  const user = actor.username || actor.name;
   record.userId = actor.id;
-  record.user = actor.name;
-  record.createdBy = actor.name;
+  record.user = user;
+  record.createdBy = user;
   record.createdAt = new Date().toISOString();
 }
 
 function stampUpdated(record: Record<string, unknown>, actor: AuditActor) {
   if (!record.userId) record.userId = actor.id;
-  record.updatedBy = actor.name;
+  record.updatedBy = actor.username || actor.name;
   record.updatedAt = new Date().toISOString();
 }
 
@@ -256,20 +258,57 @@ export async function tooManyFailedLogins(email: string): Promise<boolean> {
   }
 }
 
-export async function listAudit(options: {
+export type AuditQuery = {
   entityType?: string | null;
   action?: string | null;
   actorUserId?: string | null;
-  limit: number;
-}) {
+  actorUsername?: string | null;
+  search?: string | null;
+  from?: string | null;
+  to?: string | null;
+};
+
+function auditWhere(options: AuditQuery) {
   const filters = [];
   if (options.entityType) filters.push(eq(auditLog.entityType, options.entityType));
   if (options.action) filters.push(eq(auditLog.action, options.action));
   if (options.actorUserId) filters.push(eq(auditLog.actorUserId, options.actorUserId));
+  if (options.actorUsername) filters.push(ilike(auditLog.actorUsername, `%${options.actorUsername}%`));
+  if (options.from) {
+    const date = new Date(`${options.from}T00:00:00`);
+    if (!Number.isNaN(date.getTime())) filters.push(gte(auditLog.at, date));
+  }
+  if (options.to) {
+    const date = new Date(`${options.to}T23:59:59`);
+    if (!Number.isNaN(date.getTime())) filters.push(lte(auditLog.at, date));
+  }
+  const q = options.search ? `%${options.search}%` : null;
+  if (q) {
+    filters.push(
+      or(
+        ilike(auditLog.summary, q),
+        ilike(auditLog.action, q),
+        ilike(auditLog.actorUsername, q),
+        ilike(auditLog.actorEmail, q),
+        ilike(auditLog.actorName, q),
+        ilike(auditLog.entityId, q),
+      )!,
+    );
+  }
+  return filters.length ? and(...filters) : undefined;
+}
+
+export async function listAudit(options: AuditQuery & { limit: number; offset?: number }) {
   return db
     .select()
     .from(auditLog)
-    .where(filters.length ? and(...filters) : undefined)
+    .where(auditWhere(options))
     .orderBy(desc(auditLog.at))
-    .limit(options.limit);
+    .limit(options.limit)
+    .offset(options.offset ?? 0);
+}
+
+export async function countAudit(options: AuditQuery) {
+  const rows = await db.select({ count: count() }).from(auditLog).where(auditWhere(options));
+  return rows[0]?.count ?? 0;
 }

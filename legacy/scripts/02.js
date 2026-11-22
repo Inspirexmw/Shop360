@@ -9,7 +9,7 @@
     ['daily','Daily'],['receiving','Stock log'],['orders','Orders'],['suppliers','Suppliers'],
     ['customers','Customers'],['layaway','Lay-by'],['finance:cash','Cashbook'],
     ['finance:exp','Expenses'],['finance:rec','Reconcile'],['finance:xfer','Transfers'],
-    ['reports','Reports'],['team','Team'],['settings','Settings']
+    ['reports','Reports'],['team','Team'],['audit','Audit'],['settings','Settings']
   ];
 
   function sourceFor(key){

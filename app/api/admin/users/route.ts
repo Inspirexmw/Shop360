@@ -6,7 +6,8 @@ import { users } from "@/db/schema";
 import { currentUser, uniqueUsername } from "@/lib/auth";
 import { recordAudit } from "@/lib/audit";
 import { sendAccountCreatedEmail } from "@/lib/email";
-import { isRole, normalizeRole } from "@/lib/roles";
+import { getRoleDefinitions } from "@/lib/role-store";
+import { isRoleKey, normalizeRole } from "@/lib/roles";
 
 async function requireOwner() {
   const user = await currentUser();
@@ -15,13 +16,13 @@ async function requireOwner() {
   return { user };
 }
 
-function publicUser(u: typeof users.$inferSelect) {
+function publicUser(u: typeof users.$inferSelect, keys: string[]) {
   return {
     id: u.id,
     email: u.email,
     name: u.name,
     username: u.username ?? "",
-    role: normalizeRole(u.role),
+    role: normalizeRole(u.role, keys),
     active: u.active,
     createdAt: u.createdAt,
   };
@@ -32,8 +33,10 @@ export async function GET() {
   if ("error" in auth) return NextResponse.json({ error: auth.error }, { status: auth.status });
 
   try {
+    const defs = await getRoleDefinitions();
+    const keys = defs.map((d) => d.key);
     const rows = await db.select().from(users).orderBy(users.createdAt);
-    return NextResponse.json({ users: rows.map(publicUser) });
+    return NextResponse.json({ users: rows.map((u) => publicUser(u, keys)), roleLabels: Object.fromEntries(defs.map((d) => [d.key, d.label])) });
   } catch (e) {
     console.error("GET /api/admin/users error:", e);
     return NextResponse.json({ error: "Failed to load users" }, { status: 500 });
@@ -46,6 +49,8 @@ export async function POST(req: Request) {
 
   try {
     const body = (await req.json()) as { email?: string; password?: string; name?: string; role?: string };
+    const defs = await getRoleDefinitions();
+    const keys = defs.map((d) => d.key);
     const email = String(body.email ?? "").trim().toLowerCase();
     const name = String(body.name ?? "").trim();
     const password = String(body.password ?? "");
@@ -60,7 +65,7 @@ export async function POST(req: Request) {
     if (password.length < 6) {
       return NextResponse.json({ error: "Password must be at least 6 characters" }, { status: 400 });
     }
-    if (!isRole(role)) {
+    if (!isRoleKey(role, keys)) {
       return NextResponse.json({ error: "Choose a valid role" }, { status: 400 });
     }
 
@@ -81,7 +86,7 @@ export async function POST(req: Request) {
       })
       .returning();
 
-    const createdUser = publicUser(created);
+    const createdUser = publicUser(created, keys);
     await recordAudit(
       {
         action: "users.create",
@@ -91,13 +96,14 @@ export async function POST(req: Request) {
         after: { email: createdUser.email, name: createdUser.name, role: createdUser.role, active: createdUser.active },
         intent: "users",
       },
-      { id: auth.user.id, email: auth.user.email, name: auth.user.name, role: auth.user.role },
+      { id: auth.user.id, email: auth.user.email, name: auth.user.name, role: auth.user.role, username: auth.user.username },
     );
     const emailResult = await sendAccountCreatedEmail({
       name: createdUser.name,
       email: createdUser.email,
       password,
       role: createdUser.role,
+      roleLabel: defs.find((d) => d.key === createdUser.role)?.label,
       createdBy: auth.user.name,
     });
 
@@ -114,8 +120,10 @@ export async function PATCH(req: Request) {
 
   try {
     const body = (await req.json()) as { id?: string; role?: string; active?: boolean };
+    const defs = await getRoleDefinitions();
+    const keys = defs.map((d) => d.key);
     if (!body.id) return NextResponse.json({ error: "Account id required" }, { status: 400 });
-    if (body.role !== undefined && !isRole(body.role)) {
+    if (body.role !== undefined && !isRoleKey(body.role, keys)) {
       return NextResponse.json({ error: "Choose a valid role" }, { status: 400 });
     }
     if (body.active !== undefined && typeof body.active !== "boolean") {
@@ -129,12 +137,13 @@ export async function PATCH(req: Request) {
     const target = rows[0];
     if (!target) return NextResponse.json({ error: "Account not found" }, { status: 404 });
 
-    const nextRole = body.role !== undefined ? body.role : normalizeRole(target.role);
+    const currentRole = normalizeRole(target.role, keys);
+    const nextRole = body.role !== undefined ? body.role : currentRole;
     const nextActive = body.active !== undefined ? body.active : target.active;
-    const losingOwner = normalizeRole(target.role) === "owner" && (nextRole !== "owner" || !nextActive);
+    const losingOwner = currentRole === "owner" && (nextRole !== "owner" || !nextActive);
     if (losingOwner) {
       const all = await db.select().from(users).where(eq(users.active, true));
-      if (all.filter((u) => normalizeRole(u.role) === "owner").length <= 1) {
+      if (all.filter((u) => normalizeRole(u.role, keys) === "owner").length <= 1) {
         return NextResponse.json({ error: "At least one active owner must remain" }, { status: 409 });
       }
     }
@@ -145,10 +154,10 @@ export async function PATCH(req: Request) {
       .where(eq(users.id, target.id))
       .returning();
 
-    const roleChanged = nextRole !== normalizeRole(target.role);
+    const roleChanged = nextRole !== currentRole;
     const statusChanged = nextActive !== target.active;
     const changes: string[] = [];
-    if (roleChanged) changes.push(`role ${normalizeRole(target.role)} → ${nextRole}`);
+    if (roleChanged) changes.push(`role ${currentRole} → ${nextRole}`);
     if (statusChanged) changes.push(`active ${target.active} → ${nextActive}`);
     await recordAudit(
       {
@@ -156,14 +165,14 @@ export async function PATCH(req: Request) {
         entityType: "users",
         entityId: updated.id,
         summary: `${updated.name}: ${changes.join("; ") || "no changes"}`,
-        before: { role: normalizeRole(target.role), active: target.active },
+        before: { role: currentRole, active: target.active },
         after: { role: nextRole, active: nextActive },
         intent: "users",
       },
-      { id: auth.user.id, email: auth.user.email, name: auth.user.name, role: auth.user.role },
+      { id: auth.user.id, email: auth.user.email, name: auth.user.name, role: auth.user.role, username: auth.user.username },
     );
 
-    return NextResponse.json({ ok: true, user: publicUser(updated) });
+    return NextResponse.json({ ok: true, user: publicUser(updated, keys) });
   } catch (e) {
     console.error("PATCH /api/admin/users error:", e);
     return NextResponse.json({ error: "Failed to update account" }, { status: 500 });

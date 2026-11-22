@@ -179,10 +179,6 @@ export default function AuthScreen({ onLogin }: { onLogin: (user: { id: string; 
             {loading ? "Signing in…" : "Sign in"}
           </button>
         </form>
-
-        <p style={{ marginTop: 24, fontSize: 10, fontWeight: 600, textAlign: "center", color: s.muted }}>
-          Accounts are created by your business owner under Team &amp; access. Contact your owner if you need access.
-        </p>
       </div>
     </div>
   );

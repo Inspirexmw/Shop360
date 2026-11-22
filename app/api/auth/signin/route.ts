@@ -39,7 +39,7 @@ export async function POST(req: Request) {
     if (!u.active) {
       await recordAudit(
         { action: "auth.sign_in_failed", entityType: "user", entityId: u.id, summary: "Failed sign-in: disabled account", intent: "auth" },
-        { id: u.id, email: u.email, name: u.name, role: u.role },
+        { id: u.id, email: u.email, name: u.name, role: u.role, username: u.username },
       );
       return NextResponse.json({ error: "Account is disabled" }, { status: 401 });
     }
@@ -48,7 +48,7 @@ export async function POST(req: Request) {
     if (!valid) {
       await recordAudit(
         { action: "auth.sign_in_failed", entityType: "user", entityId: u.id, summary: "Failed sign-in: wrong password", intent: "auth" },
-        { id: u.id, email: u.email, name: u.name, role: u.role },
+        { id: u.id, email: u.email, name: u.name, role: u.role, username: u.username },
       );
       return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
     }
@@ -56,11 +56,11 @@ export async function POST(req: Request) {
     await createSession(u.id);
     await recordAudit(
       { action: "auth.sign_in", entityType: "session", entityId: u.id, summary: "Signed in", intent: "auth" },
-      { id: u.id, email: u.email, name: u.name, role: u.role },
+      { id: u.id, email: u.email, name: u.name, role: u.role, username: u.username },
     );
     return NextResponse.json({
       ok: true,
-      user: { id: u.id, email: u.email, name: u.name, role: u.role },
+      user: { id: u.id, email: u.email, name: u.name, role: u.role, username: u.username },
     });
   } catch (e) {
     console.error("POST /api/auth/signin error:", e);

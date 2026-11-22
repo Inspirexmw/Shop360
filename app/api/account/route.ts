@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { currentUser, publicUser } from "@/lib/auth";
+import { recordAudit } from "@/lib/audit";
 
 export async function GET() {
   const u = await currentUser();
@@ -66,8 +67,22 @@ export async function PATCH(req: Request) {
     patch.preferences = merged;
   }
 
+  const changed = Object.keys(patch).filter((k) => k !== "updatedAt");
+
   try {
     const [updated] = await db.update(users).set(patch).where(eq(users.id, me.id)).returning();
+    await recordAudit(
+      {
+        action: "account.updated",
+        entityType: "user",
+        entityId: me.id,
+        summary: changed.length ? `Updated ${changed.join(", ")}` : "Account settings saved",
+        before: Object.fromEntries(changed.map((k) => [k, me[k as keyof typeof me]])),
+        after: Object.fromEntries(changed.map((k) => [k, updated[k as keyof typeof updated]])),
+        intent: "auth",
+      },
+      { id: me.id, email: me.email, name: me.name, role: me.role, username: me.username },
+    );
     return NextResponse.json({ ok: true, user: publicUser(updated) });
   } catch (e) {
     const err = e as { code?: string; cause?: { code?: string } };

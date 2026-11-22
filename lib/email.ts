@@ -11,6 +11,7 @@ export type AccountCreatedInput = {
   email: string;
   password: string;
   role: string;
+  roleLabel?: string;
   createdBy: string;
 };
 
@@ -29,7 +30,7 @@ function signInUrl() {
 
 function buildAccountCreatedEmail(input: AccountCreatedInput) {
   const name = input.name.trim();
-  const role = ROLE_LABELS[normalizeRole(input.role)];
+  const role = input.roleLabel || ROLE_LABELS[normalizeRole(input.role) as keyof typeof ROLE_LABELS];
   const owner = input.createdBy.trim() || "your business owner";
   const url = signInUrl();
   const subject = "Your Shop360 account is ready";

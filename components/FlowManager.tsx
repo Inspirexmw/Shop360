@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import LoadScreen from "@/components/LoadScreen";
 import AuthScreen from "@/components/AuthScreen";
 import Shop360App from "@/components/Shop360App";
+import type { RbacPolicy } from "@/lib/roles";
 
 type FlowStep = "load" | "auth" | "dashboard";
 type SessionUser = { id: string; email: string; name: string; role: string };
@@ -11,9 +12,11 @@ type SessionUser = { id: string; email: string; name: string; role: string };
 export default function FlowManager({
   markup,
   scripts,
+  policy,
 }: {
   markup: string;
   scripts: { id: string | null; code: string }[];
+  policy: RbacPolicy;
 }) {
   const [step, setStep] = useState<FlowStep>("load");
   const [user, setUser] = useState<SessionUser | null>(null);
@@ -38,5 +41,5 @@ export default function FlowManager({
   if (step === "load") return <LoadScreen />;
   if (step === "auth")
     return <AuthScreen onLogin={(u: SessionUser) => { setUser(u); setStep("dashboard"); }} />;
-  return <Shop360App markup={markup} scripts={scripts} user={user} />;
+  return <Shop360App markup={markup} scripts={scripts} user={user} policy={policy} />;
 }

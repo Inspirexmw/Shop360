@@ -29,7 +29,7 @@ export async function POST(req: Request) {
   await revokeOtherSessions(me.id, await currentToken());
   await recordAudit(
     { action: "auth.password_changed", entityType: "user", entityId: me.id, summary: "Password changed; other sessions revoked", intent: "auth" },
-    { id: me.id, email: me.email, name: me.name, role: me.role },
+    { id: me.id, email: me.email, name: me.name, role: me.role, username: me.username },
   );
   return NextResponse.json({ ok: true });
 }

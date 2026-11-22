@@ -37,8 +37,125 @@ async function acctRequest(url,method,body){
 }
 
 // Team & access: accounts are provisioned and managed by the owner only.
-function accessLabel(role){const map={owner:'Everything, including team and data',manager:'Operations, stock, orders and reports',cashier:'Point of sale, sales and customers',finance:'Cashbook, expenses, reconciliation and transfers'};return map[role]||''}
+function roleModules(role){const p=window.SHOP360_RBAC||{};return (p.modules||[]).filter(m=>(m.access||[]).indexOf(role)!==-1).map(m=>m.label)}
+function accessLabel(role){const m=roleModules(role);return m.length>4?m.slice(0,4).join(' · ')+' +'+(m.length-4)+' more':m.join(' · ')}
 function teamRoles(){return (window.SHOP360_RBAC&&window.SHOP360_RBAC.roles)||['owner','manager','cashier','finance']}
+function roleMsg(text,ok){const el=document.getElementById('roleMsg');if(!el)return;el.textContent=text||'';el.className='acct-msg'+(text?(ok?' ok':' err'):'')}
+
+async function renderRoleRows(){
+  const body=document.getElementById('roleRows');if(!body)return;
+  if(window.SHOP360_ROLE!=='owner'){
+    body.innerHTML='<tr><td colspan="4"><div class="empty">Only the business owner can manage access categories.</div></td></tr>';return;
+  }
+  body.innerHTML='<tr><td colspan="4"><div class="empty">Loading categories…</div></td></tr>';
+  try{
+    const j=await acctRequest('/api/admin/roles','GET'),rows=j.roles||[];
+    window.__shop360RoleDefs=rows;
+    const all=(window.SHOP360_RBAC&&window.SHOP360_RBAC.modules)||[];
+    const nameOf=k=>{const m=all.find(x=>x.key===k);return m?m.label:k};
+    body.innerHTML=rows.map(r=>{
+      const mods=r.modules||[];
+      const type=r.builtIn?'<span class="badge in-stock">Built-in</span>':'<span class="badge">Custom</span>';
+      const actions=r.builtIn?'<span class="muted">—</span>':`<button type="button" class="tiny-btn" onclick="openRoleForm('${esc(r.key)}')">Edit</button> <button type="button" class="tiny-btn" onclick="deleteRole('${esc(r.key)}')">Delete</button>`;
+      return `<tr><td><b>${esc(r.label)}</b>${r.description?`<div class="muted">${esc(r.description)}</div>`:''}</td><td class="muted">${esc(mods.map(nameOf).join(' · ')||'No modules')}</td><td>${type}</td><td>${actions}</td></tr>`;
+    }).join('')||'<tr><td colspan="4"><div class="empty">No categories yet.</div></td></tr>';
+  }catch(err){body.innerHTML=`<tr><td colspan="4"><div class="empty">${esc(err.message||'Could not load categories.')}</div></td></tr>`}
+}
+
+function openRoleForm(key){
+  const all=(window.SHOP360_RBAC&&window.SHOP360_RBAC.modules)||[];
+  const current=key?(window.__shop360RoleDefs||[]).find(r=>r.key===key):null;
+  if(key&&!current){toast('Category not found.');return}
+  const checked=current?(current.modules||[]):[];
+  const boxes=all.map(m=>`<label style="display:inline-flex;align-items:center;gap:6px;margin:0 16px 8px 0;min-width:200px"><input type="checkbox" name="modules" value="${esc(m.key)}" ${checked.indexOf(m.key)!==-1?'checked':''}> ${esc(m.label)}</label>`).join('');
+  showModal(current?'Edit category · '+current.label:'New access category',`<form class="acct-form" onsubmit="saveRole(event)">
+    <input type="hidden" name="key" value="${esc(key||'')}">
+    <div class="form-grid">
+      <div class="field"><label>CATEGORY NAME</label><input name="name" required maxlength="60" value="${esc(current?current.label:'')}" autocomplete="off"></div>
+      <div class="field"><label>DESCRIPTION</label><input name="description" maxlength="200" value="${esc(current?(current.description||''):'')}" placeholder="What is this category for?" autocomplete="off"></div>
+    </div>
+    <div class="field" style="margin-top:10px"><label>MODULES THIS CATEGORY CAN ACCESS</label><div style="display:flex;flex-wrap:wrap;padding:8px 0">${boxes}</div><small class="muted">Owner / Admin always has every module. Write actions follow the modules you select.</small></div>
+    <div class="acct-row"><span class="acct-msg" id="roleMsg"></span><button class="btn primary">${current?'Save category':'Create category'}</button></div>
+  </form>`);
+}
+
+async function saveRole(e){
+  e.preventDefault();const f=e.currentTarget,d=new FormData(f),key=String(d.get('key')||'');
+  const body={name:d.get('name'),description:d.get('description'),modules:d.getAll('modules').map(String)};
+  roleMsg('Saving…',true);
+  try{
+    if(key)await acctRequest('/api/admin/roles','PATCH',{...body,id:key});
+    else await acctRequest('/api/admin/roles','POST',body);
+    closeModal();toast(key?'Category updated.':'Category created.');setTimeout(()=>location.reload(),800);
+  }catch(err){roleMsg(err.message,false)}
+}
+
+async function deleteRole(key){
+  if(!confirm('Delete this access category? Team members using it must be reassigned first.'))return;
+  try{await acctRequest('/api/admin/roles','DELETE',{id:key});toast('Category deleted.');setTimeout(()=>location.reload(),800)}
+  catch(err){toast(err.message)}
+}
+
+const AUDIT_ACTIONS=[
+  ['auth.sign_in','Signed in','in-stock'],['auth.sign_out','Signed out',''],['auth.sign_in_failed','Failed sign-in','out'],['auth.password_changed','Password changed','low'],
+  ['record.create','Record added','in-stock'],['record.update','Record updated',''],['record.delete','Record removed','out'],['settings.update','Settings changed','low'],
+  ['state.initialised','Workspace created','in-stock'],['state.bulk_update','Bulk update','low'],['data.erase','Data erased','out'],
+  ['users.create','Team member added','in-stock'],['users.role_changed','Role changed','low'],['users.status_changed','Access changed','low'],['users.updated','Team member updated',''],
+  ['roles.create','Category created','in-stock'],['roles.update','Category updated','low'],['roles.delete','Category removed','out'],['account.updated','Account updated','low']
+];
+function auditMeta(a){const f=AUDIT_ACTIONS.find(x=>x[0]===a);return f?{label:f[1],tone:f[2]}:{label:String(a||'Activity').replace(/\./g,' ').replace(/^./,c=>c.toUpperCase()),tone:''}}
+function auditDate(v){if(!v)return '—';const d=new Date(v);return isNaN(d.getTime())?esc(v):d.toLocaleString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}
+function auditSearchChanged(){clearTimeout(window.__auditTimer);window.__auditTimer=setTimeout(()=>renderAuditRows(),300)}
+function auditQuery(offset){
+  const q=new URLSearchParams();q.set('limit','50');q.set('offset',String(offset||0));
+  const val=id=>{const el=document.getElementById(id);return el?String(el.value||'').trim():''};
+  const s=val('auditSearch'),a=val('auditAction'),u=val('auditUser'),f=val('auditFrom'),t=val('auditTo');
+  if(s)q.set('search',s);if(a)q.set('action',a);if(u)q.set('actorUsername',u);if(f)q.set('from',f);if(t)q.set('to',t);
+  return q;
+}
+async function loadAuditUsers(){
+  const sel=document.getElementById('auditUser');if(!sel)return;
+  try{const j=await acctRequest('/api/admin/users','GET'),keep=sel.value;
+    sel.innerHTML='<option value="">All users</option>'+(j.users||[]).map(u=>`<option value="${esc(u.username||u.id)}">${esc(u.username||u.email)} · ${esc(u.name||'')}</option>`).join('');
+    sel.value=keep;
+  }catch(e){}
+}
+async function renderAuditRows(reset){
+  const body=document.getElementById('auditRows');if(!body)return;
+  if(window.SHOP360_ROLE!=='owner'){
+    body.innerHTML='<tr><td colspan="7"><div class="empty">Only the business owner can view the audit trail.</div></td></tr>';return;
+  }
+  const sel=document.getElementById('auditAction');
+  if(sel&&sel.options.length<=1)sel.innerHTML='<option value="">All actions</option>'+AUDIT_ACTIONS.map(x=>`<option value="${esc(x[0])}">${esc(x[1])}</option>`).join('');
+  if(reset!==false){window.__auditEntries=[];window.__auditOffset=0}
+  const offset=window.__auditOffset||0;
+  body.innerHTML='<tr><td colspan="7"><div class="empty">Loading audit trail…</div></td></tr>';
+  try{
+    const j=await acctRequest('/api/audit?'+auditQuery(offset).toString(),'GET'),rows=j.entries||[];
+    window.__auditEntries=(window.__auditEntries||[]).concat(rows);
+    window.__auditOffset=offset+rows.length;
+    const total=Number(j.total)||0;
+    const count=document.getElementById('auditCount');if(count)count.textContent=total?`${window.__auditEntries.length} of ${total} record${total===1?'':'s'}`:'No records';
+    const more=document.getElementById('auditMore');if(more)more.innerHTML=window.__auditEntries.length<total?'<button type="button" class="btn secondary" onclick="renderAuditRows(false)">Load more</button>':'';
+    body.innerHTML=(window.__auditEntries||[]).map((e,i)=>{
+      const m=auditMeta(e.action);
+      const user=e.actorUsername?`<b>${esc(e.actorUsername)}</b>${e.actorName&&e.actorName!==e.actorUsername?`<div class="muted">${esc(e.actorName)}</div>`:''}`:'<span class="muted">—</span>';
+      const detail=esc(e.summary||'—')+(e.entityId?`<div class="muted">${esc(e.entityId)}</div>`:'');
+      return `<tr><td class="muted">${auditDate(e.at)}</td><td>${user}</td><td><span class="badge ${m.tone}">${esc(m.label)}</span></td><td>${detail}</td><td class="muted">${esc(e.entityType||'—')}</td><td class="muted">${esc(e.intent||'—')}</td><td><button type="button" class="tiny-btn" onclick="viewAuditEntry(${i})">View</button></td></tr>`;
+    }).join('')||'<tr><td colspan="7"><div class="empty">No activity recorded yet.</div></td></tr>';
+    loadAuditUsers();
+  }catch(err){body.innerHTML=`<tr><td colspan="7"><div class="empty">${esc(err.message||'Could not load the audit trail.')}</div></td></tr>`}
+}
+function viewAuditEntry(i){
+  const e=(window.__auditEntries||[])[i];if(!e)return;
+  const m=auditMeta(e.action),pretty=v=>{if(v==null)return '—';try{return JSON.stringify(v,null,2)}catch(_){return String(v)}};
+  const box=(title,v)=>v==null?'':`<details style="margin-top:10px;border:1px solid var(--line);border-radius:8px"><summary style="cursor:pointer;padding:8px 10px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:#5e6a7b">${esc(title)} <span class="muted" style="font-weight:500;text-transform:none;letter-spacing:0">· click to expand</span></summary><pre style="white-space:pre-wrap;max-height:220px;overflow:auto;background:#f6f8fa;padding:10px;border-radius:0 0 8px 8px;font-size:11px;margin:0">${esc(pretty(v))}</pre></details>`;
+  showModal('Audit entry · '+m.label,`<div class="form-note"><b>${esc(m.label)}</b> · ${esc(auditDate(e.at))}<br>User Id: <b>${esc(e.actorUsername||'—')}</b>${e.actorName?' · '+esc(e.actorName):''}<br>Email: ${esc(e.actorEmail||'—')}${e.actorRole?' · Role: '+esc(e.actorRole):''}</div>
+  <p>${esc(e.summary||'—')}</p>
+  <div class="muted" style="font-size:11px">Reference: ${esc(e.entityId||'—')} · Module: ${esc(e.entityType||'—')} · Intent: ${esc(e.intent||'—')}</div>
+  ${box('Before',e.before)}${box('After',e.after)}
+  <div class="form-actions"><button class="btn secondary" onclick="closeModal()">Close</button></div>`);
+}
 
 async function renderTeamRows(){
   const body=document.getElementById('teamRows');if(!body)return;

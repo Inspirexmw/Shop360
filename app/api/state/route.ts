@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { appState } from "@/db/schema";
 import { currentUser } from "@/lib/auth";
 import { prepareAuditStateChange, recordAudit, writeAuditEntries } from "@/lib/audit";
+import { getRoleDefinitions } from "@/lib/role-store";
 import { canRunIntent, normalizeRole } from "@/lib/roles";
 
 const STATE_ID = "shop360-blank-test-state-v1";
@@ -36,7 +37,9 @@ export async function POST(req: Request) {
     if (typeof body.payload !== "string") {
       return NextResponse.json({ error: "payload required" }, { status: 400 });
     }
-    if (!canRunIntent(normalizeRole(user.role), body.intent ?? "general")) {
+    const defs = await getRoleDefinitions();
+    const role = normalizeRole(user.role, defs.map((d) => d.key));
+    if (!canRunIntent(role, body.intent ?? "general", defs)) {
       return NextResponse.json({ error: "Your role cannot perform this action" }, { status: 403 });
     }
 
@@ -63,7 +66,7 @@ export async function POST(req: Request) {
     }
 
     const nextVersion = dbVersion + 1;
-    const actor = { id: user.id, email: user.email, name: user.name, role: user.role };
+    const actor = { id: user.id, email: user.email, name: user.name, role: user.role, username: user.username };
     const { payload: stampedPayload, actions } = prepareAuditStateChange(
       existing.length ? existing[0].payload : null,
       body.payload,
@@ -95,7 +98,8 @@ export async function POST(req: Request) {
 export async function DELETE() {
   const user = await currentUser();
   if (!user) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
-  if (normalizeRole(user.role) !== "owner") {
+  const defs = await getRoleDefinitions();
+  if (normalizeRole(user.role, defs.map((d) => d.key)) !== "owner") {
     return NextResponse.json({ error: "Only an owner can erase all data" }, { status: 403 });
   }
   try {
@@ -107,7 +111,7 @@ export async function DELETE() {
         summary: "All business data erased by owner",
         intent: "data",
       },
-      { id: user.id, email: user.email, name: user.name, role: user.role },
+      { id: user.id, email: user.email, name: user.name, role: user.role, username: user.username },
     );
     await db.delete(appState).where(eq(appState.id, STATE_ID));
     return NextResponse.json({ ok: true });

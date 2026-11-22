@@ -28,10 +28,13 @@
     const page = window.SHOP360_PAGE || 'dashboard';
     if (page === 'finance') return 'finance';
     if (page === 'team') return 'users';
+    if (page === 'audit') return 'audit';
     if (page === 'settings') return 'settings';
     if (page === 'account') return 'general';
-    if (page === 'inventory' || page === 'receiving' || page === 'orders' || page === 'suppliers') return 'inventory';
-    if (page === 'sales' || page === 'pos' || page === 'customers' || page === 'layaway' || page === 'daily') return 'sales';
+    if (page === 'inventory' || page === 'receiving') return 'inventory';
+    if (page === 'orders' || page === 'suppliers') return 'orders';
+    if (page === 'daily' || page === 'reports') return 'reports';
+    if (page === 'sales' || page === 'pos' || page === 'customers' || page === 'layaway') return 'sales';
     return 'general';
   }
   function intentFor(handler) {
@@ -49,7 +52,11 @@
       window.SHOP360_PAGE = page;
       window.SHOP360_INTENT = defaultIntent();
       const result = originalNavigate.apply(this, arguments);
-      if (page === 'team' && typeof renderTeamRows === 'function') renderTeamRows();
+      if (page === 'team') {
+        if (typeof renderRoleRows === 'function') renderRoleRows();
+        if (typeof renderTeamRows === 'function') renderTeamRows();
+      }
+      if (page === 'audit' && typeof renderAuditRows === 'function') renderAuditRows();
       return result;
     };
   }
