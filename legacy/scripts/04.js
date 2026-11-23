@@ -49,6 +49,12 @@ function accInit(){
     state.migrations.push('layby-not-account-v1');
     persist();
   }
+  // Restore any seeded payment account that is missing from this data (e.g. POS / Card). Existing accounts are left alone.
+  if(!state.migrations.includes('accounts-seed-restore-v1')){
+    ACC_SEED.forEach(s=>{if(!accList().some(a=>a.name===s.name))accList().push({id:accNextId(),name:s.name,type:s.type,active:true,openingBalance:0,methods:[s.name]})});
+    state.migrations.push('accounts-seed-restore-v1');
+    persist();
+  }
   accTagAll();
 }
 // Account picked by the cashier, only when the picker is visible.
