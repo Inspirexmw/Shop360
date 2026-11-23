@@ -8,21 +8,24 @@ const ACC_TYPES={bank:'Bank',cash:'Cash',mobile:'Mobile Money',other:'Other'};
 const ACC_SEED=[{name:'Cash',type:'cash'},{name:'Bank Transfer',type:'bank'},{name:'Airtel Money',type:'mobile'},{name:'TNM Mpamba',type:'mobile'},{name:'POS / Card',type:'bank'}];
 
 function accList(){if(!Array.isArray(state.accounts))state.accounts=[];return state.accounts}
+// Lay-by is a payment flow, not a place money sits. Its payments post to the account they were paid into.
+function accIsLayby(a){return !!a&&String(a.name||'').trim().toLowerCase()==='lay-by'}
+function accVisible(){return accList().filter(a=>!accIsLayby(a))}
 function accById(id){return id?accList().find(a=>a.id===id)||null:null}
 function accName(id){return accById(id)?.name||''}
 function accNextId(){return 'ACC-'+String(Math.max(0,...accList().map(a=>+String(a.id).replace(/\D/g,'')||0))+1).padStart(3,'0')}
-function accsFor(m){return accList().filter(a=>a.active!==false&&(a.methods||[]).includes(m))}
-function accOfMethod(m){const L=accList().filter(a=>(a.methods||[]).includes(m));return L.find(a=>a.active!==false)||L[0]||accList().find(a=>a.name===m)||null}
+function accsFor(m){return accVisible().filter(a=>a.active!==false&&(a.methods||[]).includes(m))}
+function accOfMethod(m){if(m==='Lay-by')return null;const L=accVisible().filter(a=>(a.methods||[]).includes(m));return L.find(a=>a.active!==false)||L[0]||accVisible().find(a=>a.name===m)||null}
 function accEnsure(m){const name=m||'Unassigned';let a=accList().find(x=>x.name===name);if(!a){a={id:accNextId(),name,type:'other',active:true,openingBalance:0,methods:m?[m]:[]};accList().push(a)}return a}
 // Account for a payment method. A cashier's explicit pick wins when it is valid for that method.
 // True when a method has accounts but every one of them is inactive.
 function accBlocked(m){const L=accList().filter(a=>(a.methods||[]).includes(m));return L.length>0&&!L.some(a=>a.active!==false)}
 function accBlockMsg(m){return `${m} has no active account. Activate an account for ${m} or choose another payment method.`}
 // Returns null when no active account can take this money. Callers must stop the save.
-function accFor(m,picked){if(picked&&accsFor(m).some(a=>a.id===picked))return picked;const L=accsFor(m);if(L[0])return L[0].id;if(accBlocked(m))return null;const a=accOfMethod(m)||accEnsure(m);return a.active===false?null:a.id}
+function accFor(m,picked){if(m==='Lay-by')return null;if(picked&&accsFor(m).some(a=>a.id===picked))return picked;const L=accsFor(m);if(L[0])return L[0].id;if(accBlocked(m))return null;const a=accOfMethod(m)||accEnsure(m);return a.active===false?null:a.id}
 // True when a cashbook row is a mirror of a record that the ledger already counts.
 function cbMirrored(e){const c=String(e.customerCollectionId||'');if(!c)return false;
- if(c.startsWith('CC-SALE-')){const f=state.sales.find(x=>(x.transactionId||x.id)===c.slice(8));if(!f||f.paymentMethod==='Lay-by'||f.paymentMethod==='Customer store credit')return false;const a=Math.max(0,(f.cashReceived!=null?+f.cashReceived:(+f.paid||0)-(+f.storeCreditUsed||0))-(+f.exchangeOffset||0));return a>0}
+ if(c.startsWith('CC-SALE-')){const f=state.sales.find(x=>(x.transactionId||x.id)===c.slice(8));if(f&&f.paymentMethod==='Lay-by')return true;if(!f||f.paymentMethod==='Lay-by'||f.paymentMethod==='Customer store credit')return false;const a=Math.max(0,(f.cashReceived!=null?+f.cashReceived:(+f.paid||0)-(+f.storeCreditUsed||0))-(+f.exchangeOffset||0));return a>0}
  if(c.startsWith('CC-PAY-')){const pid=c.slice(7);return (state.payments||[]).some(p=>p.id===pid&&p.method!=='Customer store credit'&&!p.storeCreditUsed)}
  const m=c.match(/^CC-LAY-(.+)-(\d+)$/);if(m){const l=(state.layaways||[]).find(x=>x.id===m[1]);return !!l&&(l.payments||[]).some(p=>+p.amount===+e.amount&&p.method===e.method&&p.date===e.date)}
  return false}
@@ -36,6 +39,14 @@ function accInit(){
   if(!state.migrations.includes('accounts-v1')){
     if(!accList().length)ACC_SEED.forEach(s=>accList().push({id:accNextId(),name:s.name,type:s.type,active:true,openingBalance:0,methods:[s.name]}));
     state.migrations.push('accounts-v1');
+    persist();
+  }
+  // Lay-by is a payment method, not an account. Remove the pseudo-account and the cashbook rows it received.
+  if(!state.migrations.includes('layby-not-account-v1')){
+    const lb=accList().filter(accIsLayby).map(a=>a.id);
+    if(lb.length&&Array.isArray(state.cashbook)){state.cashbook=state.cashbook.filter(e=>!(lb.includes(e.accountId)||e.method==='Lay-by'))}
+    state.accounts=accList().filter(a=>!accIsLayby(a));
+    state.migrations.push('layby-not-account-v1');
     persist();
   }
   accTagAll();
@@ -53,7 +64,7 @@ function accEnhanceForms(){document.querySelectorAll('#modalBody form[data-acc-p
 /* Settings → Accounts management */
 function openAccounts(){
   const all=cashAll();
-  const rows=accList().map(a=>{const bal=all.filter(x=>x.aid===a.id).reduce((s,x)=>s+x.in-x.out,0),methods=(a.methods||[]).join(', ')||'None';return `<tr><td><b>${esc(a.name)}</b></td><td>${esc(ACC_TYPES[a.type]||'Other')}</td><td>${money(+a.openingBalance||0)}</td><td><b>${money(bal)}</b></td><td>${esc(methods)}</td><td>${a.active===false?'<span class="badge">Inactive</span>':'<span class="badge in-stock">Active</span>'}</td><td style="white-space:nowrap"><button class="tiny-btn" onclick="openAccountForm('${a.id}')">Edit</button> <button class="tiny-btn" onclick="accToggle('${a.id}')">${a.active===false?'Activate':'Deactivate'}</button></td></tr>`}).join('');
+  const rows=accVisible().map(a=>{const bal=all.filter(x=>x.aid===a.id).reduce((s,x)=>s+x.in-x.out,0),methods=(a.methods||[]).join(', ')||'None';return `<tr><td><b>${esc(a.name)}</b></td><td>${esc(ACC_TYPES[a.type]||'Other')}</td><td>${money(+a.openingBalance||0)}</td><td><b>${money(bal)}</b></td><td>${esc(methods)}</td><td>${a.active===false?'<span class="badge">Inactive</span>':'<span class="badge in-stock">Active</span>'}</td><td style="white-space:nowrap"><button class="tiny-btn" onclick="openAccountForm('${a.id}')">Edit</button> <button class="tiny-btn" onclick="accToggle('${a.id}')">${a.active===false?'Activate':'Deactivate'}</button></td></tr>`}).join('');
   showModal('Accounts management',`<div class="form-note">Accounts are where money is held. Payment methods are how customers paid. Balances are calculated from transactions: opening balance + money in − money out ± transfers.</div><div class="table-wrap" style="margin-top:12px"><table><thead><tr><th>Account</th><th>Type</th><th>Opening</th><th>Current balance</th><th>Payment methods</th><th>Status</th><th></th></tr></thead><tbody>${rows||'<tr><td colspan="7" class="empty">No accounts yet.</td></tr>'}</tbody></table></div><div class="form-actions"><button type="button" class="btn secondary" onclick="closeModal()">Close</button><button type="button" class="btn primary" onclick="openAccountForm()">＋ Add account</button></div>`)
 }
 function openAccountForm(id){
