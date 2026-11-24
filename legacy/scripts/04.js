@@ -97,7 +97,7 @@ function openAccountForm(id,parentPreset){
 }
 function saveAccount(e,id){
   e.preventDefault();const f=e.currentTarget,d=formData(e),name=(d.name||'').trim();
-  const methods=[...new Set([...f.querySelectorAll('input[name=methods]:checked')].map(x=>x.value).concat(String(d.extraMethods||'').split(',').map(x=>x.trim()).filter(x=>x&&!['Lay-by','Unpaid / credit','Customer store credit'].includes(x))))];
+  let methods=[...new Set([...f.querySelectorAll('input[name=methods]:checked')].map(x=>x.value).concat(String(d.extraMethods||'').split(',').map(x=>x.trim()).filter(x=>x&&!['Lay-by','Unpaid / credit','Customer store credit'].includes(x))))];
   if(!name){toast('Enter an account name.');return}
   if(accList().some(a=>a.id!==id&&a.name.toLowerCase()===name.toLowerCase())){toast('An account with this name already exists.');return}
   const a=id?accById(id):null;if(id&&!a){toast('This account no longer exists.');return}
@@ -106,7 +106,8 @@ function saveAccount(e,id){
     if(!parent||parent.parentId){toast('Choose a bank account to belong to.');return}
     if(parentId===id){toast('An account cannot belong to itself.');return}
     if(id&&accChildren(id).length){toast('This account has channels, so it cannot belong to another account.');return}
-    if((parent.methods||[]).length){toast(`${parent.name} receives payments directly. Remove its payment methods and put them on a channel instead.`);return}
+    // The bank's own payment methods move onto this channel, so the bank is left with channels only.
+    const moved=(parent.methods||[]);if(moved.length){methods=[...new Set([...methods,...moved])];parent.methods=[];toast(`Moved ${moved.join(', ')} from ${parent.name} onto this channel.`)}
     if(!methods.length){toast('A channel needs at least one payment method.');return}
   }
   if(id&&accChildren(id).length&&methods.length){toast(`${a.name} has channels. Put payment methods on its channels, not on the bank itself.`);return}
