@@ -52,6 +52,12 @@ function accInit(){
     state.migrations.push('accounts-blank-reset-v1');
     persist();
   }
+  // Every shop starts with a Cash account. New setups get it on first load; existing ones get it once if it is missing.
+  if(!state.migrations.includes('cash-default-account-v1')){
+    if(!accList().some(a=>a.name==='Cash'))accList().push({id:accNextId(),name:'Cash',type:'cash',active:true,openingBalance:0,methods:['Cash']});
+    state.migrations.push('cash-default-account-v1');
+    persist();
+  }
   accTagAll();
 }
 // Account picked by the cashier, only when the picker is visible.
