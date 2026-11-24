@@ -152,7 +152,7 @@ function pdfFooters(c){
     doc.setPage(i);
     doc.setDrawColor(0);doc.setLineWidth(0.2);doc.line(M,286,W-M,286);
     doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(0);
-    doc.text('Generated from Shop360 records. Amounts in K.',M,290);
+    doc.text('Generated from Shop360 records. Amounts in MWK.',M,290);
     doc.text('Page '+i+' of '+n,W-M,290,{align:'right'});
   }
 }
