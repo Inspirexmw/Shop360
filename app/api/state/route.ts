@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { appState } from "@/db/schema";
 import { currentUser } from "@/lib/auth";
 import { prepareAuditStateChange, recordAudit, writeAuditEntries } from "@/lib/audit";
+import { findInsufficientFunds } from "@/lib/ledger-guard";
 import { getRoleDefinitions } from "@/lib/role-store";
 import { canRunIntent, normalizeRole } from "@/lib/roles";
 
@@ -33,9 +34,20 @@ export async function POST(req: Request) {
   if (!user) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
 
   try {
-    const body = (await req.json()) as { payload?: string; version?: number; intent?: string };
+    let body: { payload?: string; version?: number; intent?: string };
+    try {
+      body = (await req.json()) as { payload?: string; version?: number; intent?: string };
+    } catch {
+      return NextResponse.json({ error: "invalid JSON body" }, { status: 400 });
+    }
     if (typeof body.payload !== "string") {
       return NextResponse.json({ error: "payload required" }, { status: 400 });
+    }
+    let nextState: Record<string, unknown>;
+    try {
+      nextState = JSON.parse(body.payload);
+    } catch {
+      return NextResponse.json({ error: "payload must be JSON" }, { status: 400 });
     }
     const defs = await getRoleDefinitions();
     const role = normalizeRole(user.role, defs.map((d) => d.key));
@@ -65,6 +77,22 @@ export async function POST(req: Request) {
       );
     }
 
+    // Money guard: no account may end below zero by this save (Top Up is the only way to fix a shortfall).
+    const funds = findInsufficientFunds(existing.length ? existing[0].payload : null, nextState);
+    if (funds) {
+      return NextResponse.json(
+        {
+          error: "insufficient_funds",
+          message: `Not enough money in ${funds.accountName || "this account"}. Top up the account first.`,
+          accountId: funds.accountId,
+          accountName: funds.accountName,
+          balance: funds.balance,
+          version: dbVersion,
+        },
+        { status: 422 },
+      );
+    }
+
     const nextVersion = dbVersion + 1;
     const actor = { id: user.id, email: user.email, name: user.name, role: user.role, username: user.username };
     const { payload: stampedPayload, actions } = prepareAuditStateChange(
@@ -75,10 +103,28 @@ export async function POST(req: Request) {
     );
 
     if (existing.length) {
-      await db
+      // Compare-and-swap: only write if the row still has the version we validated against.
+      const updated = await db
         .update(appState)
         .set({ payload: stampedPayload, version: nextVersion, updatedAt: new Date() })
-        .where(eq(appState.id, STATE_ID));
+        .where(and(eq(appState.id, STATE_ID), eq(appState.version, dbVersion)))
+        .returning({ version: appState.version });
+      if (!updated.length) {
+        const now = await db
+          .select({ payload: appState.payload, version: appState.version })
+          .from(appState)
+          .where(eq(appState.id, STATE_ID))
+          .limit(1);
+        return NextResponse.json(
+          {
+            error: "state_conflict",
+            message: "State was updated elsewhere. Reloading to reconcile.",
+            version: now.length ? now[0].version : 0,
+            payload: now.length ? now[0].payload : null,
+          },
+          { status: 409 },
+        );
+      }
     } else {
       await db.insert(appState).values({
         id: STATE_ID,
