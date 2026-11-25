@@ -254,16 +254,93 @@ const sup=(d.supplier==='__new'?d.supplierNew:d.supplier||'').trim();if(!sup){to
 const o={id:'PO-'+String(Math.max(0,...(state.orders||[]).map(x=>+String(x.id).replace(/\D/g,'')||0))+1).padStart(3,'0'),supplier:sup,country:d.country.trim(),cur:d.cur,rate,extra:0,extras:[],sellThrough:Math.min(100,Math.max(1,+d.sellThrough||100)),status:'Draft',date:todayKey(),lines:[]};state.orders.unshift(o);ensureSuppliers();persist();renderAll();pid?reorderFill(o.id,pid):showOrder(o.id)}
 function showOrder(id){const o=state.orders.find(x=>x.id===id);if(!o)return;const c=oc(o),ed=o.status==='Draft'||o.status==='Ordered';
 const th=['Category','Item (colours & sizes)','Pairs',`Cost / pair (${curLabel(o.cur)})`,'Landed / pair (MWK)','Sell / pair','Profit / pair','Margin','Break-even pairs','Projected profit',''].map(h=>`<th>${h}</th>`).join('');
-const rows=c.lines.map(l=>`<tr${ed?` style="cursor:pointer" title="Click to edit this item" onclick="editOrdLine('${id}',${l.i})"`:''}><td>${esc(l.category)}</td><td><b>${esc(l.sub||l.model)}</b>${l.brand&&l.brand!=='Unbranded'?' · '+esc(l.brand):''}<div class="muted" style="font-size:10px;white-space:normal;min-width:180px">${vSummary(l)||'No sizes entered'}</div></td><td>${l.qty}</td><td>${nf(l.unitCost)}</td><td>${nf(l.unit)}</td><td>${nf(l.sell)}</td><td class="${l.perPair>=0?'positive':''}">${nf(l.perPair)}</td><td>${pc(l.margin)}</td><td>${l.be}</td><td class="${l.prof>=0?'positive':''}">${money(l.prof)}</td><td>${ed?`<button class="btn secondary" onclick="event.stopPropagation();delOrdLine('${id}',${l.i})">✕</button>`:''}</td></tr>`).join('')||'<tr><td colspan="11">No items yet. Add the first one below.</td></tr>';
+const rows=c.lines.map(l=>`<tr${ed?` style="cursor:pointer" title="Click to edit this item" onclick="editOrdLine('${id}',${l.i})"`:''}><td>${esc(l.category)}</td><td><b>${esc(l.sub||l.model)}</b>${l.brand&&l.brand!=='Unbranded'?' · '+esc(l.brand):''}<div class="muted" style="font-size:10px;white-space:normal;min-width:180px">${vSummary(l)||'No sizes entered'}</div></td><td>${l.qty}</td><td>${nf(l.unitCost)}</td><td>${nf(l.unit)}</td><td>${nf(l.sell)}</td><td class="${l.perPair>=0?'positive':''}">${nf(l.perPair)}</td><td>${pc(l.margin)}</td><td>${l.be}</td><td class="${l.prof>=0?'positive':''}">${money(l.prof)}</td><td>${ordCanDelLine(o,l)?`<button class="btn secondary" onclick="event.stopPropagation();delOrdLine('${id}',${l.i})">✕</button>`:''}</td></tr>`).join('')||'<tr><td colspan="11">No items yet. Add the first one below.</td></tr>';
 const add=priceNote(o)+(ed?`<div style="margin-top:14px"><button class="btn primary" onclick="openOrderItem('${id}')">＋ Add item</button></div>`:'');
 const act=o.status==='Draft'?`<button class="btn primary" onclick="openMarkOrdered('${id}')">Mark as ordered</button> <button class="btn secondary" onclick="delOrder('${id}')">Delete order</button>`:(o.status==='Ordered'||o.status==='Part-received')?`<button class="btn primary" onclick="openReceiveOrder('${id}')">Receive stock</button> <button class="btn secondary" onclick="openCloseOutstanding('${id}')">Close outstanding items</button>`:'';
 showModal(`${o.id} · ${o.supplier}`,`<div class="muted" style="font-size:12px;margin-bottom:12px">${esc(o.country||'')} · ${curLabel(o.cur)}${o.cur!=='MWK'?' at '+o.rate+' K each':''} · Extra costs ${money((o.extra||0)+c.late)} · Status <b>${o.status}</b> · Expected sell-through <input type="number" min="1" max="100" value="${o.sellThrough}" style="width:62px" onchange="setST('${id}',this.value)">%</div>
 <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:14px">${[['Total cost',money(c.cost)],['Revenue if all sold',money(c.revAll)],['Profit if all sold',money(c.profAll)],[`Profit at ${o.sellThrough}% sold`,money(c.prof)]].map(([a,b])=>`<div style="background:#f5f7fa;border-radius:10px;padding:10px 12px"><div class="muted" style="font-size:10px">${a}</div><div style="font-weight:800;font-size:15px;margin-top:3px">${b}</div></div>`).join('')}</div>
-${extrasHTML(o)}${payHTML(o)}${closureHTML(o)}${actualHTML(o,c)}<div class="table-wrap"><table><thead><tr>${th}</tr></thead><tbody>${rows}</tbody></table></div>${add}
+${extrasHTML(o)}${payHTML(o)}${closureHTML(o)}${removedHTML(o)}${actualHTML(o,c)}<div class="table-wrap"><table><thead><tr>${th}</tr></thead><tbody>${rows}</tbody></table></div>${add}
 <h3 style="margin:18px 0 8px;font-size:14px">By category</h3><div class="table-wrap">${catTable([o])}</div>
 <div class="form-actions"><button class="btn secondary" onclick="closeModal()">Close</button>${act}</div>`)}
 function addOrdLine(e,id){e.preventDefault();const d=formData(e),o=state.orders.find(x=>x.id===id);o.lines.push({category:d.category,model:d.model.trim(),qty:Math.round(+d.qty),unitCost:+d.unitCost,sell:+d.sell});persist();renderAll();showOrder(id)}
-function delOrdLine(id,i){const o=state.orders.find(x=>x.id===id);o.lines.splice(i,1);persist();renderAll();showOrder(id)}
+let delBusy=false;
+function lineRecvd(l){return (+l.recv||0)>0||(l.variants||[]).some(v=>(+v.recv||0)>0)}
+function ordCanDelLine(o,l){return ['Draft','Ordered'].includes(o.status)||(o.status==='Part-received'&&!lineRecvd(l))}
+function isCreditRow(x){return x.method==='Supplier credit'||x.method==='Supplier credit issued'}
+// Settlement maths for removing line i. Paid share is proportional to the order's paid ratio, so the
+// paid and unpaid parts always add up to the exact change in the order total (no money created or lost).
+function delCalc(o,i){
+  const D=ordDue(o),clone=structuredClone(o);clone.lines.splice(i,1);
+  const D2=ordDue(clone),delta=Math.round(D-D2),P=ordPaid(o);
+  const p=D>0&&P>0?Math.max(0,Math.min(delta,Math.round(delta*P/D))):0;
+  const byM={};(o.payments||[]).filter(x=>!isCreditRow(x)).forEach(x=>{byM[x.method]=(byM[x.method]||0)+(+x.amount||0)});
+  const cashEntries=Object.entries(byM).filter(([,a])=>a>0),Pc=cashEntries.reduce((a,[,v])=>a+v,0);
+  const pc=P>0&&Pc>0?Math.min(Math.round(p*Pc/P),Pc):0,pr=p-pc;
+  let left=pc;const split=cashEntries.map(([m,a],k)=>{const amt=k===cashEntries.length-1?left:Math.min(left,Math.round(pc*a/Pc));left-=amt;return {method:m,amount:amt}}).filter(s=>s.amount>0);
+  return {D,D2,delta,P,p,u:delta-p,pc,pr,split};
+}
+function delToken(){return 'DEL-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8)}
+function delBreakdownText(c){const parts=c.split.map(s=>`${s.method} ${money(s.amount)}`);if(c.pr>0)parts.push(`Supplier credit ${money(c.pr)}`);return parts.join(' · ')||'—'}
+function openDelSettlement(id,i){
+  const o=state.orders.find(x=>x.id===id),l=o.lines[i];if(!o||!l)return;ensureSuppliers();
+  const c=delCalc(o,i),token=delToken(),qty=l.qty;
+  window._delSnap={id,i,line:JSON.stringify(l),token};
+  const owedBefore=Math.max(0,c.D-c.P),owedAfter=Math.max(0,c.D2-(c.P-c.p));
+  const canRefund=linkOn()&&c.p>0,canCredit=c.p>0;
+  const buttons=c.p>0?`${canRefund?`<button class="btn primary" onclick="delChoose('refund')">A · Supplier refunds ${money(c.p)}</button>`:''}${canCredit?`<button class="btn primary" onclick="delChoose('credit')">B · Supplier gives ${money(c.p)} credit</button>`:''}`:`<button class="btn primary" onclick="delChoose('none')">C · Remove the unpaid item</button>`;
+  showModal('Remove item · '+id,`<div class="form-note"><b>${esc(l.category)} · ${esc(l.sub||l.model)}</b>${vSummary(l)?`<div class="muted" style="font-size:11px">${vSummary(l)}</div>`:''}<div style="margin-top:8px">Quantity removed: <b>${qty}</b><br>Value removed from order: <b>${money(c.delta)}</b><br>Paid portion (already paid for this item): <b>${money(c.p)}</b><br>Paid by: ${esc(delBreakdownText(c))}<br>Unpaid portion, deducted from what you owe: <b>${money(c.u)}</b><br>Proposed settlement amount: <b>${money(c.p)}</b></div></div>
+<div class="form-note" style="margin-top:8px">Order total ${money(c.D)} → ${money(c.D2)}. Paid ${money(c.P)} → ${money(c.P-c.p)}. Still owed ${money(owedBefore)} → ${money(owedAfter)}.</div>
+${c.p>0?`<div class="muted" style="font-size:12px;margin-top:10px">${canRefund?'A records the cash the supplier returns in the Cashbook against the original payment accounts. ':''}B adds the amount to the supplier's credit for future orders and does not touch the Cashbook.${linkOn()?'':' Refunds need Cashbook linking turned on.'}</div>`:'<div class="muted" style="font-size:12px;margin-top:10px">Nothing has been paid for this item, so removing it only reduces the amount owed.</div>'}
+<div class="form-actions"><button type="button" class="btn secondary" onclick="showOrder('${id}')">Cancel</button>${buttons}</div>`);
+}
+function delChoose(mode){const s=window._delSnap;if(!s){toast('Open the removal again.');return}applyDelSettlement(s.id,s.i,mode,s.token)}
+function applyDelSettlement(id,i,mode,token){
+  if(delBusy)return;delBusy=true;
+  try{
+    const o=state.orders.find(x=>x.id===id),snap=window._delSnap;
+    if(!o||!o.lines[i]){toast('That item is no longer on the order.');return}
+    o.removals=o.removals||[];
+    if(o.removals.some(r=>r.token===token)){toast('This removal has already been recorded.');window._delSnap=null;return}
+    if(!snap||snap.id!==id||snap.token!==token||snap.line!==JSON.stringify(o.lines[i])){toast('The order changed. Open the removal again.');return}
+    const l=o.lines[i],c=delCalc(o,i);
+    if(c.p===0&&mode!=='none'){toast('Nothing has been paid for this item.');return}
+    if(mode==='refund'&&!linkOn()){toast('Turn on Cashbook linking to record a refund.');return}
+    const sup=state.suppliers.find(x=>sk(x.name)===sk(o.supplier));
+    if(c.p>0&&!sup){toast('Supplier record not found.');return}
+    const date=todayKey(),time=nowTime(),sid='REM-'+Date.now().toString(36)+'-'+(o.removals.length+1);
+    state.cashbook=state.cashbook||[];o.payments=Array.isArray(o.payments)?o.payments:[];
+    const pay=(method,amount,settlement)=>o.payments.push({id:'RM-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,6),date,method,amount:-amount,settlement,removal:sid});
+    if(c.p>0){
+      if(mode==='refund'){
+        c.split.forEach(s=>{const cid=nextCb();state.cashbook.push({id:cid,date,time,dir:'in',cat:'Supplier refund',amount:s.amount,method:s.method,note:`${o.id} · ${o.supplier} refund for removed item`,order:o.id,removal:sid});o.payments.push({id:cid,date,method:s.method,amount:-s.amount,settlement:'refund',removal:sid})});
+      }else{
+        c.split.forEach(s=>pay(s.method,s.amount,'credit'));
+      }
+      if(c.pr>0)pay('Supplier credit',c.pr,'credit-restored');
+      sup.creditLedger=sup.creditLedger||[];
+      if(mode==='credit'&&c.pc>0)sup.creditLedger.push({date,type:'Credit issued',amount:c.pc,ref:o.id,removal:sid});
+      if(c.pr>0)sup.creditLedger.push({date,type:'Credit restored',amount:c.pr,ref:o.id,removal:sid});
+      sup.creditBalance=supplierCredit(sup)+c.pr+(mode==='credit'?c.pc:0);
+    }
+    const rec={id:sid,token,date,time,item:[l.category,l.sub||l.model,vSummary(l)].filter(Boolean).join(' · '),line:structuredClone(l),qty:l.qty,originalTotal:Math.round(c.D),revisedTotal:Math.round(c.D2),valueRemoved:c.delta,paidBefore:Math.round(c.P),paidPortion:c.p,unpaidPortion:c.u,settlement:c.p===0?'none':mode,settlementLabel:c.p===0?'Unpaid item removed':mode==='refund'?'Supplier refund':'Supplier credit',cashPortion:c.pc,creditPortion:c.pr,breakdown:c.split};
+    o.lines.splice(i,1);
+    o.removals.push(rec);
+    activity('Order item removed',o.id,o.supplier,`${rec.item} · ${rec.qty} pairs · ${money(rec.valueRemoved)} · ${rec.settlementLabel}`);
+    window._delSnap=null;
+    persist();renderAll();showOrder(id);
+    toast(c.p===0?'Item removed. The amount owed went down.':mode==='refund'?`Item removed. ${money(c.p)} recorded as a supplier refund in the Cashbook.`:`Item removed. ${money(c.p)} added to supplier credit.`);
+  }finally{delBusy=false}
+}
+function delOrdLine(id,i){
+  const o=state.orders.find(x=>x.id===id),l=o&&o.lines[i];if(!l)return;
+  if(lineRecvd(l)){toast('This item has received stock, so it cannot be removed here. Use Receive stock or a stock adjustment to correct it.');return}
+  if(!ordCanDelLine(o,l)){toast('Items on a received order cannot be removed.');return}
+  if(o.lines.length<=1&&ordPaid(o)>0){toast('Keep at least one item on an order that has payments.');return}
+  if(ordPaid(o)>0){openDelSettlement(id,i);return}
+  window._delSnap={id,i,line:JSON.stringify(l),token:delToken()};
+  applyDelSettlement(id,i,'none',window._delSnap.token);
+}
+function removedHTML(o){const R=o.removals||[];if(!R.length)return '';return `<h3 style="margin:14px 0 8px;font-size:14px">Removed items</h3><div class="table-wrap"><table><thead><tr><th>Date</th><th>Item</th><th>Qty</th><th>Value removed</th><th>Paid portion</th><th>Unpaid portion</th><th>Settlement</th></tr></thead><tbody>${R.map(r=>`<tr><td>${esc(r.date)}</td><td>${esc(r.item)}</td><td>${r.qty}</td><td>${money(r.valueRemoved)}</td><td>${money(r.paidPortion)}</td><td>${money(r.unpaidPortion)}</td><td>${esc(r.settlementLabel)}</td></tr>`).join('')}</tbody></table></div>`}
 function setST(id,v){const o=state.orders.find(x=>x.id===id);o.sellThrough=Math.min(100,Math.max(1,+v||100));persist();renderAll();showOrder(id)}
 function setOrdStatus(id,st){const o=state.orders.find(x=>x.id===id);if(!o.lines.length){toast('Add at least one item first.');return}o.status=st;activity('Stock order '+st.toLowerCase(),id,o.supplier,oc(o).qty+' pairs');persist();renderAll();showOrder(id);if(st==='Received')toast('Marked received.')}
 function delOrder(id){if(!confirm('Delete '+id+'?'))return;state.orders=state.orders.filter(x=>x.id!==id);persist();closeModal();renderAll()}
@@ -964,7 +1041,7 @@ activity('Inventory import',pl.ok.length+' row(s)','Shop',`${np} new item(s), ${
 
 
 /* ---------- Finance ---------- */
-const FIN_IN=['Owner contribution','Loan received','Other business funds','Owner top-up','Opening balance','Other income'];
+const FIN_IN=['Owner contribution','Loan received','Other business funds','Supplier refund','Owner top-up','Opening balance','Other income'];
 const FIN_OUT=['Rent','Salaries & wages','Transport','Utilities','Airtime & data','Meals & refreshments','Supplies & packaging','Repairs & maintenance','Supplier payment',"Owner's drawings",'Bank & mobile money charges'];
 const FIN_METHODS=['Cash','Bank Transfer','Airtel Money','TNM Mpamba','POS / Card'];
 const FIN_NOEXP=['Supplier payment',"Owner's drawings",'Cash short (reconciliation)','Cash over (reconciliation)','Account transfer','Customer wallet withdrawal'];
