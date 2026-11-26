@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { appState } from "@/db/schema";
 import { currentUser } from "@/lib/auth";
 import { prepareAuditStateChange, recordAudit, writeAuditEntries } from "@/lib/audit";
+import { findCashbookViolation } from "@/lib/cashbook-guard";
 import { findInsufficientFunds } from "@/lib/ledger-guard";
 import { getRoleDefinitions } from "@/lib/role-store";
 import { canRunIntent, normalizeRole } from "@/lib/roles";
@@ -89,6 +90,15 @@ export async function POST(req: Request) {
           balance: funds.balance,
           version: dbVersion,
         },
+        { status: 422 },
+      );
+    }
+
+    // Manual Cashbook rules: void and reversal limits, locks and history protection.
+    const cashbookProblem = findCashbookViolation(existing.length ? existing[0].payload : null, nextState);
+    if (cashbookProblem) {
+      return NextResponse.json(
+        { error: "cashbook_rule", message: cashbookProblem, version: dbVersion },
         { status: 422 },
       );
     }

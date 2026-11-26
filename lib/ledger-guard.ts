@@ -103,7 +103,7 @@ function ledger(p: Row): Entry[] {
   });
 
   (p.cashbook || [])
-    .filter((e: Row) => !isMirrored(p, e))
+    .filter((e: Row) => !e.voided && !isMirrored(p, e))
     .forEach((e: Row) => push(e.method, e, e.dir === "in" ? num(e.amount) : 0, e.dir === "out" ? num(e.amount) : 0));
 
   // Opening balances are rows on their account, not on a payment method.
