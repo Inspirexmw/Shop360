@@ -7,6 +7,7 @@ import { prepareAuditStateChange, recordAudit, writeAuditEntries } from "@/lib/a
 import { findCashbookViolation } from "@/lib/cashbook-guard";
 import { findInsufficientFunds } from "@/lib/ledger-guard";
 import { getRoleDefinitions } from "@/lib/role-store";
+import { stampSalesperson } from "@/lib/salesperson";
 import { canRunIntent, normalizeRole } from "@/lib/roles";
 
 const STATE_ID = "shop360-blank-test-state-v1";
@@ -103,11 +104,18 @@ export async function POST(req: Request) {
       );
     }
 
+    // Salesperson: new sale rows record the signed-in operator; existing rows keep their snapshot.
+    stampSalesperson(
+      existing.length ? existing[0].payload : null,
+      nextState,
+      { id: user.id, name: user.name, username: user.username, email: user.email },
+    );
+
     const nextVersion = dbVersion + 1;
     const actor = { id: user.id, email: user.email, name: user.name, role: user.role, username: user.username };
     const { payload: stampedPayload, actions } = prepareAuditStateChange(
       existing.length ? existing[0].payload : null,
-      body.payload,
+      JSON.stringify(nextState),
       actor,
       body.intent ?? "general",
     );
