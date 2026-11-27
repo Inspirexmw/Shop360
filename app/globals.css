@@ -2728,3 +2728,19 @@ html body .shop360-header .mobile-menu{display:none!important}
   html body .main-nav{gap:11px}
   html body .shop360-header .top-actions{gap:3px}
 }
+
+
+/* Keep the unified three-part header intact against legacy mobile header rules. */
+@media(max-width:720px){
+  html body .shop360-header{
+    display:grid!important;grid-template-columns:auto minmax(0,1fr) auto!important;
+    align-items:center!important;justify-content:stretch!important;
+    width:100%!important;max-width:none!important;margin:0!important;
+    height:64px!important;min-height:64px!important;padding:0 12px!important;
+    gap:10px!important;position:sticky!important
+  }
+  html body .shop360-header>.header-brand{display:flex!important;grid-column:1;min-width:max-content}
+  html body .shop360-header>.nav-viewport{display:block!important;grid-column:2;min-width:0}
+  html body .shop360-header>.top-actions{display:flex!important;grid-column:3;min-width:max-content}
+  html body .shop360-header .header-business{display:none!important}
+}
