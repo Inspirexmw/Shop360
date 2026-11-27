@@ -2200,3 +2200,172 @@ html body .acc-check input[type=checkbox]{display:inline-block;width:16px!import
 
 /* Icon-only action buttons: square, centred */
 .btn.icon-only,.tiny-btn.icon-only{width:36px;min-width:36px;height:36px;padding:0;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle}
+
+/* =========================================================
+   Shop360 UI Transformation · Stage 1
+   Brand foundation and application shell
+   Primary: Royal Blue #1F01B9 · Accent: Lime #99CE00
+   ========================================================= */
+:root {
+  color-scheme: light;
+  --side: #ffffff !important;
+  --side2: #f2f1ff !important;
+  --sidetext: #596174 !important;
+  --bg: #f7f8fc !important;
+  --panel: #ffffff !important;
+  --ink: #191a24 !important;
+  --muted: #747b8d !important;
+  --line: #e8eaf1 !important;
+  --soft: #f1efff !important;
+  --brand: #1F01B9 !important;
+  --brand-d: #18008f !important;
+  --brand2: #eeebff !important;
+  --accent: #99CE00 !important;
+  --accent-ink: #202414 !important;
+  --action: #1F01B9 !important;
+  --on-action: #ffffff !important;
+  --shadow: 0 2px 12px rgba(22, 20, 48, .035) !important;
+  --shadow-lg: 0 12px 30px rgba(22, 20, 48, .075) !important;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --side: #171820 !important;
+  --side2: #262735 !important;
+  --sidetext: #b9bbca !important;
+  --bg: #101117 !important;
+  --panel: #191a23 !important;
+  --ink: #f4f5fa !important;
+  --muted: #a0a3b2 !important;
+  --line: #2c2e3a !important;
+  --soft: #252637 !important;
+  --brand: #8172ff !important;
+  --brand-d: #a99fff !important;
+  --brand2: #302c52 !important;
+  --accent: #99CE00 !important;
+  --accent-ink: #171a10 !important;
+  --action: #6d5cff !important;
+  --on-action: #ffffff !important;
+  --shadow: 0 3px 16px rgba(0, 0, 0, .16) !important;
+  --shadow-lg: 0 14px 34px rgba(0, 0, 0, .28) !important;
+}
+
+/* Sidebar: neutral workspace surface, with blue navigation states. */
+html body .app aside.sidebar {
+  background: var(--side) !important;
+  color: var(--ink) !important;
+  border-color: var(--line) !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+html body .sidebar .brand b,
+html body .sidebar .appName { color: var(--ink) !important; }
+html body .sidebar .brand small,
+html body .sidebar .nav-label { color: var(--muted) !important; }
+html body .sidebar .nav button {
+  color: var(--sidetext) !important;
+  transition: background .18s ease, color .18s ease, transform .18s ease;
+}
+html body .sidebar .nav button:not(.active):hover {
+  background: var(--side2) !important;
+  color: var(--brand) !important;
+}
+html body .sidebar .nav button.active {
+  background: var(--brand2) !important;
+  color: var(--brand-d) !important;
+  box-shadow: inset 3px 0 0 var(--brand) !important;
+}
+html body .sidebar .nav button.active .ico { color: var(--brand) !important; }
+html body .sidebar .nav-subnav button.active {
+  background: var(--brand2) !important;
+  color: var(--brand-d) !important;
+}
+html body .sidebar .side-bottom {
+  border-top-color: var(--line) !important;
+  color: var(--muted) !important;
+}
+html body .sidebar .side-bottom .reset-btn {
+  color: var(--sidetext) !important;
+  background: transparent !important;
+}
+html body .sidebar .side-bottom .reset-btn:hover {
+  color: var(--brand) !important;
+  background: var(--side2) !important;
+}
+
+/* Header and page canvas. */
+html body .topbar {
+  background: var(--panel) !important;
+  border-color: var(--line) !important;
+  box-shadow: var(--shadow) !important;
+}
+html body .content { background: transparent; }
+html body .page-head h1,
+html body .panel h3 { color: var(--ink); }
+html body .page-head p,
+html body .panel-sub { color: var(--muted); }
+
+/* Shared controls use the new primary identity without changing behavior. */
+html body .btn.primary,
+html body .pos-checkout,
+html body .finance-hero .finance-light-btn {
+  background: var(--action) !important;
+  color: var(--on-action) !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+html body .btn.primary:hover,
+html body .pos-checkout:hover {
+  background: var(--brand-d) !important;
+  transform: translateY(-1px);
+}
+html body .btn.secondary {
+  background: var(--panel) !important;
+  color: var(--ink) !important;
+  border-color: var(--line) !important;
+}
+html body .btn.secondary:hover {
+  border-color: var(--brand) !important;
+  color: var(--brand) !important;
+  background: var(--brand2) !important;
+}
+html body .btn.soft {
+  background: var(--brand2) !important;
+  color: var(--brand-d) !important;
+}
+html body input:focus,
+html body select:focus,
+html body textarea:focus {
+  border-color: var(--brand) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 13%, transparent) !important;
+}
+
+/* Dashboard: calmer hierarchy and more deliberate surfaces. */
+html body #page-dashboard .stat,
+html body #page-dashboard .dashboard-panel,
+html body #page-dashboard .dashboard-activity {
+  background: var(--panel) !important;
+  border-color: var(--line) !important;
+  box-shadow: var(--shadow) !important;
+}
+html body #page-dashboard .stat {
+  border-radius: 15px !important;
+}
+html body #page-dashboard .stat-num { color: var(--ink); }
+html body #page-dashboard .stat-icon {
+  background: var(--brand2) !important;
+  color: var(--brand) !important;
+}
+html body #page-dashboard .bar.current { background: var(--brand) !important; }
+html body #page-dashboard .bar:not(.current) { background: color-mix(in srgb, var(--brand) 18%, var(--panel)) !important; }
+
+/* Lime is a supporting accent only; it is not used as a large surface. */
+html body .sidebar .nav button.active:after { background: var(--accent); }
+html body .sync-dot,
+html body .inv-live-dot { accent-color: var(--accent); }
+
+@media (max-width: 720px) {
+  html body .content { background: transparent; }
+  html body .page-head { gap: 12px; }
+  html body .page-head h1 { letter-spacing: -.6px; }
+  html body #page-dashboard .dashboard-head { align-items: flex-start; }
+}
+
