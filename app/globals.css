@@ -2849,14 +2849,13 @@ html body .mobile-more-backdrop{display:none!important}
     position:relative!important;
     z-index:1;
   }
-  html body .shop360-header .main-nav .nav-group:hover,
-  html body .shop360-header .main-nav .nav-group{
+  html body .shop360-header .main-nav .nav-group:hover{
     z-index:60!important;
   }
   html body .shop360-header .main-nav .nav-subnav{
     display:none!important;
     position:absolute!important;
-    top:calc(100% + 3px)!important;
+    top:100%!important;
     left:-12px!important;
     z-index:100!important;
     min-width:210px!important;
@@ -2867,7 +2866,6 @@ html body .mobile-more-backdrop{display:none!important}
     transform:translateY(5px);
     transition:opacity .14s ease,transform .14s ease,visibility .14s ease;
   }
-  html body .shop360-header .main-nav .nav-group:hover>.nav-subnav,
   html body .shop360-header .main-nav .nav-group:hover>.nav-subnav{
     display:grid!important;
     gap:2px!important;
