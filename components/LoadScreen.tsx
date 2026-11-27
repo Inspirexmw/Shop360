@@ -44,22 +44,22 @@ export default function LoadScreen() {
         backgroundColor: s.bg,
       }}
     >
-      <div style={{ position: "relative" }}>
+      <div style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center" }}>
         <div
           style={{
             width: 96,
             height: 96,
+            boxSizing: "border-box",
             borderRadius: 24,
             border: "4px solid " + s.line,
-            borderTopColor: s.brand,
-            animation: "spin 1s linear infinite",
-            display: "grid",
-            placeItems: "center",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
-          <span style={{ color: s.brand, fontSize: 20, fontWeight: 900 }}>S</span>
+          <img src="/brand/logo-mark.svg" alt="Shop360" style={{ width: 60, height: 60, display: "block" }} />
         </div>
-        <div style={{ marginTop: 32, fontSize: 30, fontWeight: 900, letterSpacing: "-1.5px", color: s.ink }}>
+        <div style={{ marginTop: 32, fontSize: 30, fontWeight: 900, letterSpacing: "-1.5px", color: s.ink, textAlign: "center" }}>
           Shop360
         </div>
         <p
@@ -70,6 +70,7 @@ export default function LoadScreen() {
             letterSpacing: 0.15,
             textTransform: "uppercase",
             color: s.muted,
+            textAlign: "center",
           }}
         >
           Initializing workspace
@@ -110,13 +111,6 @@ export default function LoadScreen() {
       >
         Connecting to Neon · Loading state · Verifying session
       </div>
-      <style>
-        {`
-          @keyframes spin {
-            to { transform: rotate(360deg); }
-          }
-        `}
-      </style>
     </div>
   );
 }

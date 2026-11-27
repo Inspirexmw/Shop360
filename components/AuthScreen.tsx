@@ -101,7 +101,7 @@ export default function AuthScreen({ onLogin }: { onLogin: (user: { id: string; 
               placeItems: "center",
             }}
           >
-            <span style={{ color: s.brand, fontSize: 18, fontWeight: 900 }}>S</span>
+            <img src="/brand/logo-mark.svg" alt="Shop360" style={{ width: 34, height: 34, display: "block" }} />
           </div>
           <div>
             <h1 style={{ fontSize: 24, fontWeight: 900, letterSpacing: "-1px", color: s.ink, margin: 0 }}>

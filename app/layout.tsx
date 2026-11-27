@@ -4,7 +4,7 @@ import "./globals.css";
 
 // Title copied from the original Shop360 HTML <title>.
 export const metadata: Metadata = {
-  title: "Shop360 — Stage 3.3 Subtle Color Accents · V89 Functional Baseline",
+  title: "Shop360 — Business Management",
   manifest: "/manifest.webmanifest",
   appleWebApp: { capable: true, statusBarStyle: "default", title: "Shop360" },
   icons: {
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#245b4f",
+  themeColor: "#1F01B9",
 };
 
 // Same root attributes as the original HTML: <html data-app-version> and <body data-version data-stage>.
