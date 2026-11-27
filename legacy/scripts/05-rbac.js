@@ -98,8 +98,6 @@
   }
   document.addEventListener('click', guard, true);
   document.addEventListener('submit', guard, true);
-})();
-
 
   // Adapt the top navigation to the signed-in user's actual module permissions.
   // A group with one available destination becomes a direct navigation item.
@@ -135,11 +133,31 @@
   (function initHeaderGlobalSearch() {
     const input = document.getElementById('headerGlobalSearch');
     const panel = document.getElementById('headerGlobalSearchResults');
-    if (!input || !panel) return;
+    const wrapper = input && input.closest('.header-global-search');
+    const toggle = document.getElementById('headerSearchToggle');
+    if (!input || !panel || !wrapper || !toggle) return;
+    function closeSearch() {
+      wrapper.classList.remove('is-expanded');
+      panel.classList.remove('is-open');
+      input.value = '';
+      input.setAttribute('tabindex', '-1');
+      toggle.setAttribute('aria-expanded', 'false');
+      toggle.setAttribute('aria-label', 'Open search');
+    }
+    toggle.addEventListener('click', function () {
+      const opening = !wrapper.classList.contains('is-expanded');
+      if (!opening) { closeSearch(); return; }
+      wrapper.classList.add('is-expanded');
+      input.setAttribute('tabindex', '0');
+      toggle.setAttribute('aria-expanded', 'true');
+      toggle.setAttribute('aria-label', 'Close search');
+      window.setTimeout(function () { input.focus(); }, 30);
+    });
     const clean = function (value) { return String(value == null ? '' : value).toLowerCase(); };
     function addResult(list, title, detail, page, haystack) {
-      if (list.length >= 12 || !clean(haystack).includes(clean(input.value).trim())) return;
-      list.push({ title: title, detail: detail, page: page });
+      const query = clean(input.value).trim();
+      if (list.length >= 12 || !query || !clean(haystack).includes(query)) return;
+      list.push({ title: String(title || 'Record'), detail: String(detail || ''), page: page });
     }
     function search() {
       const query = clean(input.value).trim();
@@ -160,8 +178,10 @@
       }
       if (allowedPage('sales') && typeof state !== 'undefined') {
         (state.sales || []).forEach(function (s) {
-          const ref = s.id || s.ref || s.transactionId || 'Sale';
-          addResult(results, String(ref), 'Sale · ' + (s.customer || 'Walk-in customer') + (s.date ? ' · ' + s.date : ''), 'sales', [ref,s.customer,s.date,s.paymentMethod,s.method].join(' '));
+          const ref = s.saleNumber || s.reference || s.receiptNumber || s.id || s.ref || s.transactionId || 'Sale';
+          const customer = s.customerName || s.customer || s.customer_name || 'Walk-in customer';
+          const date = s.date || s.createdAt || s.created_at || '';
+          addResult(results, String(ref), 'Sale · ' + customer + (date ? ' · ' + date : ''), 'sales', [ref,customer,date,s.paymentMethod,s.payment_method,s.method,s.status].join(' '));
         });
       }
       if (!results.length) {
@@ -174,7 +194,8 @@
           const detail = document.createElement('small'); detail.textContent = item.detail;
           button.append(title, detail);
           button.addEventListener('click', function () {
-            panel.classList.remove('is-open'); input.value = '';
+            panel.classList.remove('is-open');
+            closeSearch();
             if (typeof navigate === 'function') navigate(item.page);
           });
           panel.appendChild(button);
@@ -185,13 +206,15 @@
     input.addEventListener('input', search);
     input.addEventListener('focus', search);
     input.addEventListener('keydown', function (event) {
-      if (event.key === 'Escape') { panel.classList.remove('is-open'); input.blur(); }
+      if (event.key === 'Escape') { closeSearch(); toggle.focus(); }
       if (event.key === 'Enter') {
         const first = panel.querySelector('.global-search-result');
         if (first) first.click();
       }
     });
     document.addEventListener('click', function (event) {
-      if (!event.target.closest('.header-global-search')) panel.classList.remove('is-open');
+      if (!event.target.closest('.header-global-search')) closeSearch();
     });
   })();
+
+})();
