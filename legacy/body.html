@@ -9,7 +9,7 @@
     <nav class="nav main-nav" aria-label="Primary navigation">
       <button class="active" data-page="dashboard">Overview</button>
       <div class="nav-group" data-nav-group="sales">
-        <button type="button" class="nav-group-toggle" onclick="toggleNavGroup('sales')" aria-expanded="false">Sales <span class="nav-group-chevron">⌄</span></button>
+        <button type="button" class="nav-group-toggle" aria-expanded="false">Sales <span class="nav-group-chevron">⌄</span></button>
         <div class="nav-subnav">
           <button type="button" data-page="pos">Point of Sale</button>
           <button type="button" data-page="sales">Sales history</button>
@@ -18,7 +18,7 @@
         </div>
       </div>
       <div class="nav-group" data-nav-group="products">
-        <button type="button" class="nav-group-toggle" onclick="toggleNavGroup('products')" aria-expanded="false">Products <span class="nav-group-chevron">⌄</span></button>
+        <button type="button" class="nav-group-toggle" aria-expanded="false">Products <span class="nav-group-chevron">⌄</span></button>
         <div class="nav-subnav">
           <button type="button" data-page="inventory">Inventory</button>
           <button type="button" data-page="receiving">Stock log</button>
@@ -27,7 +27,7 @@
       </div>
       <button data-page="customers">Customers</button>
       <div class="nav-group finance-nav-group" id="financeNavGroup" data-nav-group="finance">
-        <button type="button" class="nav-group-toggle" onclick="toggleNavGroup('finance')" aria-expanded="false" aria-controls="financeSubnav">Finance <span class="nav-group-chevron">⌄</span></button>
+        <button type="button" class="nav-group-toggle" aria-expanded="false" aria-controls="financeSubnav">Finance <span class="nav-group-chevron">⌄</span></button>
         <div class="nav-subnav" id="financeSubnav">
           <button type="button" data-page="finance" data-fin-tab="cash" onclick="openFinanceSection('cash')">Cashbook</button>
           <button type="button" data-page="finance" data-fin-tab="exp" onclick="openFinanceSection('exp')">Expenses</button>
@@ -37,7 +37,7 @@
       </div>
       <button data-page="reports">Reports</button>
       <div class="nav-group" data-nav-group="more">
-        <button type="button" class="nav-group-toggle" onclick="toggleNavGroup('more')" aria-expanded="false">More <span class="nav-group-chevron">⌄</span></button>
+        <button type="button" class="nav-group-toggle" aria-expanded="false">More <span class="nav-group-chevron">⌄</span></button>
         <div class="nav-subnav">
           <button type="button" data-page="suppliers">Suppliers</button>
           <button type="button" data-page="team">Team &amp; access</button>
