@@ -2850,8 +2850,7 @@ html body .mobile-more-backdrop{display:none!important}
     z-index:1;
   }
   html body .shop360-header .main-nav .nav-group:hover,
-  html body .shop360-header .main-nav .nav-group:focus-within,
-  html body .shop360-header .main-nav .nav-group.is-open{
+  html body .shop360-header .main-nav .nav-group{
     z-index:60!important;
   }
   html body .shop360-header .main-nav .nav-subnav{
@@ -2869,8 +2868,7 @@ html body .mobile-more-backdrop{display:none!important}
     transition:opacity .14s ease,transform .14s ease,visibility .14s ease;
   }
   html body .shop360-header .main-nav .nav-group:hover>.nav-subnav,
-  html body .shop360-header .main-nav .nav-group:focus-within>.nav-subnav,
-  html body .shop360-header .main-nav .nav-group.is-open>.nav-subnav{
+  html body .shop360-header .main-nav .nav-group:hover>.nav-subnav{
     display:grid!important;
     gap:2px!important;
     opacity:1;
