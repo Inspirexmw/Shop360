@@ -2929,3 +2929,57 @@ html body .mobile-more-backdrop{display:none}
 @media(min-width:721px) and (max-width:1120px){
   html body .shop360-header .main-nav{gap:clamp(9px,1vw,13px)!important}
 }
+
+
+/* Shop360 header search + permission-adaptive navigation */
+@media(min-width:721px){
+  html body .shop360-header{
+    grid-template-columns:auto minmax(190px,250px) minmax(0,1fr) auto!important;
+    gap:clamp(12px,1.35vw,20px)!important;
+  }
+  html body .header-global-search{
+    position:relative;display:flex;align-items:center;min-width:0;width:100%;
+    height:38px;padding:0 11px;gap:8px;border:1px solid var(--line);
+    border-radius:10px;background:var(--soft);color:var(--muted);
+    transition:border-color .16s ease,box-shadow .16s ease,background .16s ease;
+  }
+  html body .header-global-search:focus-within{
+    border-color:var(--brand);background:var(--panel);
+    box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 10%,transparent);
+  }
+  html body .header-global-search>svg{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
+  html body .header-global-search input{
+    width:100%;min-width:0;height:100%;padding:0;border:0;outline:0;
+    background:transparent;color:var(--ink);font:inherit;font-size:11px;
+  }
+  html body .header-global-search input::placeholder{color:var(--muted);opacity:.9}
+  html body .global-search-results{
+    display:none;position:absolute;top:calc(100% + 9px);left:0;right:0;z-index:120;
+    max-height:min(420px,65vh);overflow:auto;padding:6px;
+    border:1px solid var(--line);border-radius:13px;background:var(--panel);
+    box-shadow:0 16px 40px rgba(15,23,42,.16);
+  }
+  html body .global-search-results.is-open{display:block}
+  html body .global-search-results .global-search-result{
+    display:flex;width:100%;flex-direction:column;gap:3px;padding:9px 10px;
+    border:0;border-radius:8px;background:transparent;color:var(--ink);
+    text-align:left;cursor:pointer;font:inherit;
+  }
+  html body .global-search-results .global-search-result:hover,
+  html body .global-search-results .global-search-result:focus-visible{background:var(--soft);outline:0}
+  html body .global-search-result strong{font-size:11px;font-weight:650}
+  html body .global-search-result small{font-size:10px;color:var(--muted)}
+  html body .global-search-empty{padding:12px 10px;color:var(--muted);font-size:11px}
+  html body .shop360-header .nav-viewport{min-width:0!important}
+  html body .shop360-header .main-nav{width:max-content!important;min-width:0!important;max-width:100%!important}
+  html body .shop360-header .main-nav>button.active:after,
+  html body .shop360-header .main-nav .nav-group.is-current>.nav-group-toggle:after,
+  html body .shop360-header .main-nav>button:after,
+  html body .shop360-header .main-nav .nav-group-toggle:after{display:none!important;content:none!important}
+}
+@media(max-width:720px){
+  html body .header-global-search{display:none!important}
+}
+/* Keep permission-filtered menus visually clean without the old green active rule. */
+html body .shop360-header .main-nav>button:after,
+html body .shop360-header .main-nav .nav-group-toggle:after{display:none!important;content:none!important}
