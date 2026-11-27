@@ -2369,3 +2369,69 @@ html body .inv-live-dot { accent-color: var(--accent); }
   html body #page-dashboard .dashboard-head { align-items: flex-start; }
 }
 
+
+
+/* ===== Stage 1 refinement: balanced royal-blue + lime dashboard ===== */
+html body #page-dashboard #dashboardStats{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:16px!important;
+  margin-bottom:18px!important;
+}
+html body #page-dashboard .dash-duo-card{
+  min-width:0;
+  min-height:194px;
+  border:1px solid transparent!important;
+  border-radius:18px!important;
+  padding:21px 22px!important;
+  box-shadow:var(--shadow-lg)!important;
+  overflow:hidden;
+  position:relative;
+}
+html body #page-dashboard .dash-duo-blue{
+  color:#fff!important;
+  background:linear-gradient(135deg,#1F01B9 0%,#3219D4 100%)!important;
+  border-color:#3219D4!important;
+}
+html body #page-dashboard .dash-duo-lime{
+  color:#1b2110!important;
+  background:linear-gradient(135deg,#99CE00 0%,#B5E52C 100%)!important;
+  border-color:#99CE00!important;
+}
+html body #page-dashboard .dash-duo-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+html body #page-dashboard .dash-duo-kicker{font-size:10px;letter-spacing:1.25px;font-weight:850;opacity:.78}
+html body #page-dashboard .dash-duo-mark{width:31px;height:31px;border-radius:10px;display:grid;place-items:center;font-size:18px;font-weight:800;background:rgba(255,255,255,.16)}
+html body #page-dashboard .dash-duo-lime .dash-duo-mark{background:rgba(31,1,185,.11);color:#1F01B9}
+html body #page-dashboard .dash-duo-title{font-size:17px;font-weight:750;letter-spacing:-.35px;margin:8px 0 15px}
+html body #page-dashboard .dash-duo-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+html body #page-dashboard .dash-duo-metric{display:grid;grid-template-columns:30px minmax(0,1fr);align-items:start;gap:9px;min-width:0;padding-top:12px;border-top:1px solid rgba(255,255,255,.22)}
+html body #page-dashboard .dash-duo-lime .dash-duo-metric{border-top-color:rgba(31,1,185,.17)}
+html body #page-dashboard .dash-duo-icon{width:29px;height:29px;border-radius:9px;display:grid;place-items:center;background:rgba(255,255,255,.16);color:inherit}
+html body #page-dashboard .dash-duo-lime .dash-duo-icon{background:rgba(31,1,185,.11);color:#1F01B9}
+html body #page-dashboard .dash-duo-icon svg{width:16px;height:16px}
+html body #page-dashboard .dash-duo-copy{display:grid;gap:3px;min-width:0}
+html body #page-dashboard .dash-duo-copy small{font-size:10px;font-weight:650;opacity:.8}
+html body #page-dashboard .dash-duo-copy strong{font-size:clamp(17px,2vw,23px);font-weight:800;letter-spacing:-.65px;line-height:1.2;overflow-wrap:anywhere}
+html body #page-dashboard .dash-duo-copy>span{font-size:10px;opacity:.76;line-height:1.35}
+html body #page-dashboard .dash-duo-metric>em{grid-column:2;font-style:normal;font-size:9px;font-weight:800;opacity:.85}
+html body #page-dashboard .sales-panel{border-top:3px solid #1F01B9!important}
+html body #page-dashboard .stock-panel{border-top:3px solid #99CE00!important}
+html body #page-dashboard .bar:not(.current){background:linear-gradient(180deg,#B5E52C,#99CE00)!important}
+html body #page-dashboard .bar.current{background:#1F01B9!important}
+html body #page-dashboard .dashboard-insight-rail .mint-mark{background:#99CE00!important;color:#1b2110!important}
+html body #page-dashboard .dashboard-insight-rail .blue-mark{background:#1F01B9!important;color:#fff!important}
+html body #page-dashboard .dashboard-insight-rail .amber-mark{background:#eef4d8!important;color:#536b00!important}
+html body #page-dashboard .dash-actions .btn.secondary{background:#99CE00!important;border-color:#99CE00!important;color:#1b2110!important}
+html body #page-dashboard .dash-actions .btn.secondary:hover{background:#B5E52C!important;color:#1b2110!important}
+:root[data-theme="dark"] html body #page-dashboard .dash-duo-blue{background:linear-gradient(135deg,#1F01B9 0%,#3C27D9 100%)!important}
+:root[data-theme="dark"] html body #page-dashboard .dash-duo-lime{background:linear-gradient(135deg,#99CE00 0%,#B5E52C 100%)!important;color:#1b2110!important}
+@media(max-width:760px){
+  html body #page-dashboard #dashboardStats{grid-template-columns:1fr!important;gap:12px!important}
+  html body #page-dashboard .dash-duo-card{min-height:0;padding:18px!important}
+}
+@media(max-width:420px){
+  html body #page-dashboard .dash-duo-metrics{gap:10px}
+  html body #page-dashboard .dash-duo-metric{grid-template-columns:25px minmax(0,1fr);gap:7px}
+  html body #page-dashboard .dash-duo-icon{width:25px;height:25px}
+  html body #page-dashboard .dash-duo-copy strong{font-size:17px}
+}
