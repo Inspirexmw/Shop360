@@ -3109,3 +3109,15 @@ html body .shop360-header .main-nav .nav-group-toggle:after{display:none!importa
   #page-dashboard .dashboard-metric{padding:9px 8px}
   #page-dashboard .dashboard-metric strong{font-size:11px}
 }
+
+/* Search suggestions remain styled after the global search moves into the dashboard. */
+#page-dashboard .global-search-results .global-search-result{
+  display:flex;width:100%;flex-direction:column;gap:3px;padding:9px 10px;
+  border:0;border-radius:8px;background:transparent;color:var(--ink);
+  text-align:left;cursor:pointer;font:inherit;
+}
+#page-dashboard .global-search-results .global-search-result:hover,
+#page-dashboard .global-search-results .global-search-result:focus-visible{background:var(--soft);outline:0}
+#page-dashboard .global-search-results .global-search-result strong{font-size:11px;font-weight:650}
+#page-dashboard .global-search-results .global-search-result small{font-size:10px;color:var(--muted)}
+#page-dashboard .global-search-results .global-search-empty{padding:12px 10px;color:var(--muted);font-size:11px}
