@@ -9,11 +9,12 @@
     ['daily','Daily'],['receiving','Stock log'],['orders','Orders'],['suppliers','Suppliers'],
     ['customers','Customers'],['layaway','Lay-by'],['finance:cash','Cashbook'],
     ['finance:exp','Expenses'],['finance:rec','Reconcile'],['finance:xfer','Transfers'],
-    ['reports','Reports'],['team','Team'],['audit','Audit'],['settings','Settings']
+    ['reports','Reports'],['team','Team'],['audit','Audit'],['settings','Settings'],['account','My Account']
   ];
 
   function sourceFor(key){
     if(key==='settings') return sidebar.querySelector('.side-bottom button[onclick*="openSettings"]');
+    if(key==='account') return document.getElementById('headerAvatar');
     if(key.startsWith('finance:')) return sidebar.querySelector('[data-page="finance"][data-fin-tab="'+key.split(':')[1]+'"]');
     return sidebar.querySelector('.nav button[data-page="'+key+'"]:not([data-fin-tab])');
   }
