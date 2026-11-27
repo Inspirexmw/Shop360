@@ -2983,3 +2983,67 @@ html body .mobile-more-backdrop{display:none}
 /* Keep permission-filtered menus visually clean without the old green active rule. */
 html body .shop360-header .main-nav>button:after,
 html body .shop360-header .main-nav .nav-group-toggle:after{display:none!important;content:none!important}
+
+
+/* Shop360 header search: compact icon that expands on demand. */
+@media(min-width:721px){
+  html body .shop360-header{
+    grid-template-columns:auto 38px minmax(0,1fr) auto!important;
+  }
+  html body .shop360-header .header-global-search{
+    display:flex!important;position:relative;align-items:center;justify-content:flex-start;
+    justify-self:start;width:38px;min-width:38px;height:38px;padding:0;
+    overflow:visible;border:1px solid transparent;border-radius:10px;
+    background:transparent;box-shadow:none;transition:width .18s ease,background .18s ease,border-color .18s ease;
+    z-index:130;
+  }
+  html body .shop360-header .header-global-search.is-expanded{
+    width:228px;min-width:228px;padding:0 10px;gap:8px;
+    border-color:var(--line);background:var(--panel);
+    box-shadow:0 4px 16px rgba(15,23,42,.08);
+  }
+  html body .shop360-header .header-search-toggle{
+    display:inline-flex;align-items:center;justify-content:center;flex:0 0 36px;
+    width:36px;height:36px;padding:0;border:0;border-radius:9px;
+    color:var(--ink);background:transparent;cursor:pointer;
+  }
+  html body .shop360-header .header-search-toggle:hover,
+  html body .shop360-header .header-search-toggle:focus-visible{
+    color:var(--brand);background:var(--soft);outline:0;
+  }
+  html body .shop360-header .header-search-toggle svg{
+    width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;
+    stroke-linecap:round;flex:none;
+  }
+  html body .shop360-header .header-global-search input{
+    display:none;width:0;min-width:0;flex:1;height:34px;padding:0;
+    border:0!important;outline:0!important;background:transparent!important;
+    box-shadow:none!important;color:var(--ink);font:inherit;font-size:12px;
+  }
+  html body .shop360-header .header-global-search.is-expanded input{
+    display:block;width:auto;min-width:0;
+  }
+  html body .shop360-header .global-search-results{
+    left:0;right:auto;width:228px;min-width:228px;top:calc(100% + 8px);
+  }
+  /* Remove every legacy active underline/separator treatment, not just one pseudo-element. */
+  html body .shop360-header .main-nav>button.active,
+  html body .shop360-header .main-nav .nav-group.is-current>.nav-group-toggle,
+  html body .shop360-header .main-nav>button[data-page],
+  html body .shop360-header .main-nav .nav-group-toggle{
+    border-bottom:0!important;box-shadow:none!important;background-image:none!important;
+  }
+  html body .shop360-header .main-nav>button.active::before,
+  html body .shop360-header .main-nav>button.active::after,
+  html body .shop360-header .main-nav .nav-group.is-current>.nav-group-toggle::before,
+  html body .shop360-header .main-nav .nav-group.is-current>.nav-group-toggle::after,
+  html body .shop360-header .main-nav>button::before,
+  html body .shop360-header .main-nav>button::after,
+  html body .shop360-header .main-nav .nav-group-toggle::before,
+  html body .shop360-header .main-nav .nav-group-toggle::after{
+    content:none!important;display:none!important;height:0!important;border:0!important;
+  }
+}
+@media(max-width:720px){
+  html body .shop360-header .header-global-search{display:none!important}
+}
