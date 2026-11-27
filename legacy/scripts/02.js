@@ -1,8 +1,8 @@
 (function(){
   if (window.__shop360MobileNavReady) return;
   window.__shop360MobileNavReady = true;
-  const sidebar = document.querySelector('.sidebar');
-  if (!sidebar) return;
+  const navRoot = document.querySelector('.shop360-header .main-nav');
+  if (!navRoot) return;
 
   const items = [
     ['dashboard','Dashboard'],['pos','POS'],['inventory','Inventory'],['sales','Sales'],
@@ -13,10 +13,10 @@
   ];
 
   function sourceFor(key){
-    if(key==='settings') return sidebar.querySelector('.side-bottom button[onclick*="openSettings"]');
+    if(key==='settings') return document.querySelector('.shop360-header .header-settings-btn');
     if(key==='account') return document.getElementById('headerAvatar');
-    if(key.startsWith('finance:')) return sidebar.querySelector('[data-page="finance"][data-fin-tab="'+key.split(':')[1]+'"]');
-    return sidebar.querySelector('.nav button[data-page="'+key+'"]:not([data-fin-tab])');
+    if(key.startsWith('finance:')) return navRoot.querySelector('[data-page="finance"][data-fin-tab="'+key.split(':')[1]+'"]');
+    return navRoot.querySelector('button[data-page="'+key+'"]:not([data-fin-tab])');
   }
 
   function isFormOpen(){
@@ -86,7 +86,7 @@
     const iconWrap=document.createElement('span'); iconWrap.className='mobile-nav-icon';
     if(iconSource){const s=getComputedStyle(iconSource);iconWrap.style.color=s.color;iconWrap.style.backgroundColor=s.backgroundColor;}
     if(icon) iconWrap.innerHTML=icon.outerHTML;
-    else iconWrap.innerHTML='<span class="mobile-nav-dot"></span>';
+    else { const glyph={dashboard:'▦',pos:'▣',inventory:'▤',sales:'↗',daily:'▥',receiving:'↓',orders:'▧',suppliers:'♧',customers:'♙',layaway:'◷','finance:cash':'▤','finance:exp':'↘','finance:rec':'≋','finance:xfer':'⇄',reports:'▥',team:'♧',audit:'◉',settings:'⚙',account:'●'}; iconWrap.textContent=glyph[key]||'•'; }
     const text=document.createElement('span'); text.className='mobile-nav-label'; text.textContent=label;
     button.append(iconWrap,text);
     button.addEventListener('click',()=>requestNavigate(key));
@@ -95,17 +95,17 @@
   document.body.appendChild(nav);
 
   function syncActive(){
-    const active=sidebar.querySelector('.nav button.active[data-page]');
-    const financeActive=sidebar.querySelector('.nav-subnav button.active, .nav-subnav button.on, .nav-subnav button[aria-current="page"]');
+    const active=navRoot.querySelector('button.active[data-page]');
+    const financeActive=navRoot.querySelector('.nav-subnav button.active, .nav-subnav button.on, .nav-subnav button[aria-current="page"]');
     let key=active ? active.dataset.page : 'dashboard';
     if(key==='finance'){
-      const selected=financeActive || sidebar.querySelector('.nav-subnav button[style*="font-weight"]');
+      const selected=financeActive || navRoot.querySelector('.nav-subnav button[style*="font-weight"]');
       if(selected && selected.dataset.finTab) key='finance:'+selected.dataset.finTab;
       else key='finance:cash';
     }
     nav.querySelectorAll('.mobile-nav-item').forEach(b=>b.classList.toggle('active',b.dataset.mobileKey===key));
   }
-  new MutationObserver(syncActive).observe(sidebar,{subtree:true,attributes:true,attributeFilter:['class','aria-current','style']});
+  new MutationObserver(syncActive).observe(navRoot,{subtree:true,attributes:true,attributeFilter:['class','aria-current','style']});
   syncActive();
 
   // Closing a dirty form with Cancel, the X or the backdrop asks first.
