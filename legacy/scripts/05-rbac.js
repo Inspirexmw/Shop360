@@ -99,3 +99,99 @@
   document.addEventListener('click', guard, true);
   document.addEventListener('submit', guard, true);
 })();
+
+
+  // Adapt the top navigation to the signed-in user's actual module permissions.
+  // A group with one available destination becomes a direct navigation item.
+  function compactPermittedNavigation() {
+    const nav = document.querySelector('.shop360-header .main-nav');
+    if (!nav) return;
+    nav.querySelectorAll('.nav-group').forEach(function (group) {
+      const submenu = group.querySelector('.nav-subnav');
+      if (!submenu) return;
+      const children = Array.from(submenu.querySelectorAll('button[data-page]'))
+        .filter(function (button) { return allowedPage(button.dataset.page); });
+      if (!children.length) {
+        group.style.display = 'none';
+        return;
+      }
+      group.style.display = '';
+      if (children.length === 1) {
+        const direct = children[0].cloneNode(true);
+        direct.classList.remove('active');
+        direct.removeAttribute('aria-current');
+        direct.style.display = '';
+        group.replaceWith(direct);
+      }
+    });
+    // Centre the remaining items naturally; don't preserve empty group slots.
+    nav.style.justifyContent = 'center';
+    nav.style.width = 'max-content';
+    nav.style.minWidth = '0';
+  }
+  compactPermittedNavigation();
+
+  // Global header search: searchable records are limited to modules the role can access.
+  (function initHeaderGlobalSearch() {
+    const input = document.getElementById('headerGlobalSearch');
+    const panel = document.getElementById('headerGlobalSearchResults');
+    if (!input || !panel) return;
+    const clean = function (value) { return String(value == null ? '' : value).toLowerCase(); };
+    function addResult(list, title, detail, page, haystack) {
+      if (list.length >= 12 || !clean(haystack).includes(clean(input.value).trim())) return;
+      list.push({ title: title, detail: detail, page: page });
+    }
+    function search() {
+      const query = clean(input.value).trim();
+      panel.innerHTML = '';
+      if (query.length < 2) { panel.classList.remove('is-open'); return; }
+      const results = [];
+      if (allowedPage('inventory') && typeof state !== 'undefined') {
+        (state.products || []).forEach(function (p) {
+          const title = (typeof productTitle === 'function' ? productTitle(p) : (p.name || 'Product'));
+          const skus = (p.variants || []).map(function (v) { return v.sku || ''; }).join(' ');
+          addResult(results, title, 'Product · ' + ((p.variants || []).length ? (p.variants.length + ' variants') : 'Catalogue item'), 'inventory', [title,p.brand,p.model,p.name,skus].join(' '));
+        });
+      }
+      if (allowedPage('customers') && typeof state !== 'undefined') {
+        (state.customers || []).forEach(function (c) {
+          addResult(results, c.name || 'Customer', 'Customer · ' + (c.phone || c.email || 'Customer record'), 'customers', [c.name,c.phone,c.email].join(' '));
+        });
+      }
+      if (allowedPage('sales') && typeof state !== 'undefined') {
+        (state.sales || []).forEach(function (s) {
+          const ref = s.id || s.ref || s.transactionId || 'Sale';
+          addResult(results, String(ref), 'Sale · ' + (s.customer || 'Walk-in customer') + (s.date ? ' · ' + s.date : ''), 'sales', [ref,s.customer,s.date,s.paymentMethod,s.method].join(' '));
+        });
+      }
+      if (!results.length) {
+        panel.innerHTML = '<div class="global-search-empty">No matching records found.</div>';
+      } else {
+        results.forEach(function (item) {
+          const button = document.createElement('button');
+          button.type = 'button'; button.className = 'global-search-result'; button.setAttribute('role','option');
+          const title = document.createElement('strong'); title.textContent = item.title;
+          const detail = document.createElement('small'); detail.textContent = item.detail;
+          button.append(title, detail);
+          button.addEventListener('click', function () {
+            panel.classList.remove('is-open'); input.value = '';
+            if (typeof navigate === 'function') navigate(item.page);
+          });
+          panel.appendChild(button);
+        });
+      }
+      panel.classList.add('is-open');
+    }
+    input.addEventListener('input', search);
+    input.addEventListener('focus', search);
+    input.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') { panel.classList.remove('is-open'); input.blur(); }
+      if (event.key === 'Enter') {
+        const first = panel.querySelector('.global-search-result');
+        if (first) first.click();
+      }
+    });
+    document.addEventListener('click', function (event) {
+      if (!event.target.closest('.header-global-search')) panel.classList.remove('is-open');
+    });
+  })();
