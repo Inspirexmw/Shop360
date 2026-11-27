@@ -2744,3 +2744,95 @@ html body .shop360-header .mobile-menu{display:none!important}
   html body .shop360-header>.top-actions{display:flex!important;grid-column:3;min-width:max-content}
   html body .shop360-header .header-business{display:none!important}
 }
+
+
+/* ===== Simplified Shop360 navigation — desktop groups, mobile bottom bar ===== */
+html body .shop360-header .main-nav{gap:clamp(17px,2vw,29px);justify-content:center}
+html body .shop360-header .main-nav>button,
+html body .shop360-header .main-nav .nav-group-toggle{
+  min-height:42px;padding:10px 1px;color:var(--ink)!important;
+  background:transparent!important;border:0!important;border-radius:0!important;
+  font-size:13px;font-weight:600;letter-spacing:-.1px;
+  transition:color .16s ease,opacity .16s ease;
+}
+html body .shop360-header .main-nav>button:hover,
+html body .shop360-header .main-nav .nav-group-toggle:hover{
+  color:var(--brand)!important;background:transparent!important;
+}
+html body .shop360-header .main-nav>button.active,
+html body .shop360-header .main-nav .nav-group.is-current>.nav-group-toggle{
+  color:var(--brand)!important;font-weight:700;
+}
+html body .shop360-header .main-nav .nav-group{position:relative}
+html body .shop360-header .main-nav .nav-subnav{
+  top:calc(100% + 7px);left:-14px;min-width:205px;
+  padding:7px;background:var(--panel);border:1px solid var(--line);
+  border-radius:13px;box-shadow:0 14px 35px rgba(15,23,42,.14);
+}
+html body .shop360-header .main-nav .nav-subnav button{
+  width:100%;min-height:38px;padding:9px 11px;text-align:left;
+  color:var(--ink)!important;background:transparent!important;
+  border:0!important;border-radius:8px;font-size:12px;font-weight:550;
+}
+html body .shop360-header .main-nav .nav-subnav button:hover,
+html body .shop360-header .main-nav .nav-subnav button.active{
+  color:var(--brand)!important;background:var(--brand2)!important;
+}
+html body .shop360-header .main-nav .nav-group-toggle:focus-visible,
+html body .shop360-header .main-nav>button:focus-visible,
+html body .shop360-header .main-nav .nav-subnav button:focus-visible{
+  outline:2px solid var(--brand);outline-offset:3px;border-radius:5px;
+}
+html body .mobile-bottom-nav,
+html body .mobile-more-menu,
+html body .mobile-more-backdrop{display:none}
+
+@media(max-width:720px){
+  html body .shop360-header{height:62px!important;min-height:62px!important;padding:0 15px!important}
+  html body .shop360-header>.nav-viewport{display:none!important}
+  html body .shop360-header>.header-brand{grid-column:1!important}
+  html body .shop360-header>.top-actions{grid-column:2!important;justify-self:end}
+  html body .shop360-header .header-settings-btn,
+  html body .shop360-header .logout-btn,
+  html body .shop360-header #headerUserInfo{display:none!important}
+  html body .content{padding-bottom:100px!important}
+  html body .mobile-bottom-nav{
+    display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr));
+    position:fixed;left:0;right:0;bottom:0;z-index:80;
+    min-height:67px;padding:7px 8px max(7px,env(safe-area-inset-bottom));
+    background:var(--panel);border-top:1px solid var(--line);
+    box-shadow:0 -8px 24px rgba(15,23,42,.08);
+  }
+  html body .mobile-bottom-nav button{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:3px;min-width:0;padding:4px 2px;border:0;border-radius:10px;
+    background:transparent!important;color:var(--muted)!important;
+  }
+  html body .mobile-bottom-nav button>span{font-size:20px;line-height:1.1;font-weight:650}
+  html body .mobile-bottom-nav button>small{font-size:10px;line-height:1.2;font-weight:600}
+  html body .mobile-bottom-nav button.is-active{color:var(--brand)!important;background:var(--brand2)!important}
+  html body .mobile-more-backdrop{
+    display:block;position:fixed;inset:0;z-index:81;
+    background:rgba(15,23,42,.22);opacity:0;visibility:hidden;transition:opacity .16s ease;
+  }
+  html body .mobile-more-backdrop.is-open{opacity:1;visibility:visible}
+  html body .mobile-more-menu{
+    display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;
+    position:fixed;left:12px;right:12px;bottom:78px;z-index:82;
+    max-height:min(65vh,480px);overflow:auto;padding:11px;
+    background:var(--panel);border:1px solid var(--line);border-radius:15px;
+    box-shadow:0 16px 40px rgba(15,23,42,.18);
+    opacity:0;visibility:hidden;transform:translateY(8px);transition:all .16s ease;
+  }
+  html body .mobile-more-menu.is-open{opacity:1;visibility:visible;transform:translateY(0)}
+  html body .mobile-more-menu button{
+    min-height:42px;padding:9px 10px;text-align:left;
+    color:var(--ink)!important;background:var(--surface2,var(--soft))!important;
+    border:1px solid var(--line);border-radius:9px;font-size:12px;font-weight:600;
+  }
+  html body .mobile-more-menu button:hover{color:var(--brand)!important;background:var(--brand2)!important}
+}
+@media(max-width:380px){
+  html body .shop360-header{padding:0 11px!important}
+  html body .mobile-more-menu{left:8px;right:8px;grid-template-columns:1fr 1fr}
+}
