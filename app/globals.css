@@ -2836,3 +2836,69 @@ html body .mobile-more-backdrop{display:none}
   html body .shop360-header{padding:0 11px!important}
   html body .mobile-more-menu{left:8px;right:8px;grid-template-columns:1fr 1fr}
 }
+
+
+/* ===== Desktop navigation: hover dropdowns and aligned header container ===== */
+@media(min-width:721px){
+  html body .shop360-header{
+    width:calc(100% - 48px)!important;
+    max-width:1600px!important;
+    margin:0 auto!important;
+    padding-left:24px!important;
+    padding-right:24px!important;
+    box-sizing:border-box!important;
+  }
+  html body .shop360-header .nav-viewport{
+    overflow:visible!important;
+    min-width:0!important;
+  }
+  html body .shop360-header .main-nav{
+    width:100%!important;
+    min-width:0!important;
+    justify-content:space-between!important;
+    gap:clamp(8px,1.05vw,16px)!important;
+  }
+  html body .shop360-header .main-nav .nav-group{
+    position:relative!important;
+    z-index:1;
+  }
+  html body .shop360-header .main-nav .nav-group:hover,
+  html body .shop360-header .main-nav .nav-group:focus-within,
+  html body .shop360-header .main-nav .nav-group.is-open{
+    z-index:60!important;
+  }
+  html body .shop360-header .main-nav .nav-subnav{
+    display:none!important;
+    position:absolute!important;
+    top:calc(100% + 3px)!important;
+    left:-12px!important;
+    z-index:100!important;
+    min-width:210px!important;
+    max-height:none!important;
+    overflow:visible!important;
+    opacity:0;
+    visibility:hidden;
+    transform:translateY(5px);
+    transition:opacity .14s ease,transform .14s ease,visibility .14s ease;
+  }
+  html body .shop360-header .main-nav .nav-group:hover>.nav-subnav,
+  html body .shop360-header .main-nav .nav-group:focus-within>.nav-subnav,
+  html body .shop360-header .main-nav .nav-group.is-open>.nav-subnav{
+    display:grid!important;
+    gap:2px!important;
+    opacity:1;
+    visibility:visible;
+    transform:translateY(0);
+  }
+}
+@media(min-width:721px) and (max-width:1120px){
+  html body .shop360-header{gap:12px!important;padding-left:18px!important;padding-right:18px!important;width:calc(100% - 32px)!important}
+  html body .shop360-header .main-nav{gap:8px!important}
+  html body .shop360-header .main-nav>button,
+  html body .shop360-header .main-nav .nav-group-toggle{font-size:11px!important}
+  html body .shop360-header .top-actions{gap:5px!important}
+  html body .shop360-header #headerUserInfo{display:none!important}
+}
+@media(max-width:720px){
+  html body .shop360-header{width:100%!important;max-width:none!important;margin:0!important}
+}
