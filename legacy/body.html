@@ -5,32 +5,74 @@
 <header class="topbar shop360-header">
   <div class="header-brand"><div class="brand"><div class="logo" id="brandLogo"><img alt="Shop360" src="/brand/logo-mark.svg"></div><div class="brand-copy"><b class="appName">Shop360</b><small>Retail workspace</small></div></div></div>
   <div class="nav-viewport" aria-label="Main navigation">
-    <nav class="nav main-nav">
-      <button class="active" data-page="dashboard"><span class="ico"><svg class="" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span>Dashboard</button>
-      <button data-page="pos"><span class="ico"><svg class="" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 3h2l2.2 11.2a2 2 0 0 0 2 1.6h8.9a2 2 0 0 0 2-1.6L22 7H6"/><circle cx="10" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg></span>Point of Sale</button>
-      <button data-page="inventory"><span class="ico"><svg class="" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="M3 8v8l9 5 9-5V8M12 13v8"/></svg></span>Inventory</button>
-      <button data-page="sales"><span class="ico"><svg class="" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 19V5M4 19h17"/><path d="m7 15 4-4 3 2 6-7"/><path d="M16 6h4v4"/></svg></span>Sales & orders</button>
-      <button data-page="daily"><span class="ico"><svg class="" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 9h18M7 13h3M7 17h6"/></svg></span>Daily sales</button>
-      <button data-page="receiving"><span class="ico"><svg class="" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 4h-3a2 2 0 0 0-2 2v14h16v-3"/><path d="M8 2h8v5H8zM8 11h7M8 15h5"/><path d="m16 13 2 2 4-5"/></svg></span>Stock log</button>
-      <button data-page="orders"><span class="ico"><svg class="" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 4H5a2 2 0 0 0-2 2v15h15v-3"/><path d="M8 2h8v5H8zM8 11h6"/><path d="m15 16 5-5 2 2-5 5-3 1z"/></svg></span>Stock orders</button>
-      <button data-page="suppliers"><span class="ico"><svg class="" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 7h11v11H3zM14 11h4l3 3v4h-7"/><circle cx="7.5" cy="19" r="2"/><circle cx="17.5" cy="19" r="2"/></svg></span>Suppliers</button>
-      <button data-page="customers"><span class="ico"><svg class="" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>Customers</button>
-      <button data-page="layaway"><span class="ico"><svg class="" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 9h18M12 13v4l2 1"/></svg></span>Lay-by</button>
-      <div class="nav-group finance-nav-group is-open" id="financeNavGroup">
-        <button type="button" class="nav-group-toggle" onclick="toggleFinanceNav()" aria-expanded="true" aria-controls="financeSubnav"><span class="ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="15" rx="2"/><path d="M2 10h20M16 15h2M6 5V3h12v2"/></svg></span><span class="nav-group-name">Finance</span><span class="nav-group-chevron">⌄</span></button>
-        <div class="nav-subnav" id="financeSubnav">
-          <button type="button" data-page="finance" data-fin-tab="cash" onclick="openFinanceSection('cash')"><span class="subnav-ico"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 10v4M18 10v4"/></svg></span>Cashbook</button>
-          <button type="button" data-page="finance" data-fin-tab="exp" onclick="openFinanceSection('exp')"><span class="subnav-ico"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2z"/><path d="M9 7h6M9 11h6M9 15h3"/></svg></span>Expenses</button>
-          <button type="button" data-page="finance" data-fin-tab="rec" onclick="openFinanceSection('rec')"><span class="subnav-ico"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h9"/></svg></span>Reconciliation</button>
-          <button type="button" data-page="finance" data-fin-tab="xfer" onclick="openFinanceSection('xfer')"><span class="subnav-ico"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M7 7h13l-4-4M17 17H4l4 4"/></svg></span>Account transfers</button>
+    <nav class="nav main-nav" aria-label="Primary navigation">
+      <button class="active" data-page="dashboard">Overview</button>
+      <div class="nav-group" data-nav-group="sales">
+        <button type="button" class="nav-group-toggle" onclick="toggleNavGroup('sales')" aria-expanded="false">Sales <span class="nav-group-chevron">⌄</span></button>
+        <div class="nav-subnav">
+          <button type="button" data-page="pos">Point of Sale</button>
+          <button type="button" data-page="sales">Sales history</button>
+          <button type="button" data-page="daily">Daily sales</button>
+          <button type="button" data-page="layaway">Lay-by</button>
         </div>
       </div>
-      <button data-page="reports"><span class="ico"><svg class="" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 19V5M4 19h17"/><rect x="7" y="11" width="3" height="5" rx=".5"/><rect x="13" y="7" width="3" height="9" rx=".5"/><rect x="19" y="3" width="3" height="13" rx=".5"/></svg></span>Reports</button>
-    <button data-page="team"><span class="ico"><svg class="" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg></span>Team & access</button><button data-page="audit"><span class="ico"><svg class="" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg></span>Audit trail</button></nav>
+      <div class="nav-group" data-nav-group="products">
+        <button type="button" class="nav-group-toggle" onclick="toggleNavGroup('products')" aria-expanded="false">Products <span class="nav-group-chevron">⌄</span></button>
+        <div class="nav-subnav">
+          <button type="button" data-page="inventory">Inventory</button>
+          <button type="button" data-page="receiving">Stock log</button>
+          <button type="button" data-page="orders">Stock orders</button>
+          <button type="button" data-page="transfers">Stock transfers</button>
+        </div>
+      </div>
+      <button data-page="customers">Customers</button>
+      <div class="nav-group finance-nav-group" id="financeNavGroup" data-nav-group="finance">
+        <button type="button" class="nav-group-toggle" onclick="toggleNavGroup('finance')" aria-expanded="false" aria-controls="financeSubnav">Finance <span class="nav-group-chevron">⌄</span></button>
+        <div class="nav-subnav" id="financeSubnav">
+          <button type="button" data-page="finance" data-fin-tab="cash" onclick="openFinanceSection('cash')">Cashbook</button>
+          <button type="button" data-page="finance" data-fin-tab="exp" onclick="openFinanceSection('exp')">Expenses</button>
+          <button type="button" data-page="finance" data-fin-tab="rec" onclick="openFinanceSection('rec')">Reconciliation</button>
+          <button type="button" data-page="finance" data-fin-tab="xfer" onclick="openFinanceSection('xfer')">Account transfers</button>
+        </div>
+      </div>
+      <button data-page="reports">Reports</button>
+      <div class="nav-group" data-nav-group="more">
+        <button type="button" class="nav-group-toggle" onclick="toggleNavGroup('more')" aria-expanded="false">More <span class="nav-group-chevron">⌄</span></button>
+        <div class="nav-subnav">
+          <button type="button" data-page="suppliers">Suppliers</button>
+          <button type="button" data-page="team">Team &amp; access</button>
+          <button type="button" data-page="audit">Audit trail</button>
+          <button type="button" data-page="settings">Settings</button>
+          <button type="button" data-page="account">My Account</button>
+        </div>
+      </div>
+    </nav>
   </div>
   <div class="top-actions"><input type="hidden" id="globalLocation" value="Shop"><button class="bell" id="bellBtn" onclick="event.stopPropagation();toggleNotif()" title="Notifications"><svg class="ui-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg><b id="bellBadge">0</b></button><button type="button" class="avatar avatar-btn" id="headerAvatar" onclick="openMyAccount()" title="My Account" aria-label="My Account"><span id="headerAvatarText">··</span></button><div id="headerUserInfo" style="font-size:12px"><b id="userName">Owner account</b><div class="muted" id="userRole" style="font-size:10px">Administrator</div></div><button type="button" class="ui-control header-settings-btn" onclick="openSettings()" title="Settings" aria-label="Settings"><svg class="ui-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="m19.4 15 .1.1 1.4 1.1-1.4 2.4-1.7-.7a8 8 0 0 1-1.7 1l-.3 1.8h-2.8l-.3-1.8a8 8 0 0 1-1.7-1l-1.7.7-1.4-2.4 1.4-1.1a7 7 0 0 1 0-2l-1.4-1.1 1.4-2.4 1.7.7a8 8 0 0 1 1.7-1l.3-1.8h2.8l.3 1.8a8 8 0 0 1 1.7 1l1.7-.7 1.4 2.4-1.4 1.1a7 7 0 0 1 0 2Z"/></svg></button><button type="button" class="ui-control logout-btn" onclick="accountSignOut()" title="Log out" aria-label="Log out"><svg class="ui-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/></svg></button></div>
   <span id="crumb" class="sr-only">Dashboard</span>
 </header>
+<nav class="mobile-bottom-nav" aria-label="Mobile navigation">
+  <button type="button" class="is-active" data-mobile-page="dashboard" onclick="navigate('dashboard')"><span>⌂</span><small>Home</small></button>
+  <button type="button" data-mobile-page="pos" onclick="navigate('pos')"><span>＋</span><small>Sell</small></button>
+  <button type="button" data-mobile-page="inventory" onclick="navigate('inventory')"><span>▦</span><small>Stock</small></button>
+  <button type="button" data-mobile-page="sales" onclick="navigate('sales')"><span>↗</span><small>Sales</small></button>
+  <button type="button" data-mobile-more onclick="toggleMobileMore()"><span>•••</span><small>More</small></button>
+</nav>
+<div class="mobile-more-backdrop" id="mobileMoreBackdrop" onclick="toggleMobileMore(false)"></div>
+<div class="mobile-more-menu" id="mobileMoreMenu" aria-label="More pages">
+  <button type="button" onclick="navigate('customers');toggleMobileMore(false)">Customers</button>
+  <button type="button" onclick="navigate('layaway');toggleMobileMore(false)">Lay-by</button>
+  <button type="button" onclick="navigate('receiving');toggleMobileMore(false)">Stock log</button>
+  <button type="button" onclick="navigate('orders');toggleMobileMore(false)">Stock orders</button>
+  <button type="button" onclick="navigate('transfers');toggleMobileMore(false)">Stock transfers</button>
+  <button type="button" onclick="navigate('suppliers');toggleMobileMore(false)">Suppliers</button>
+  <button type="button" onclick="navigate('finance');toggleMobileMore(false)">Finance</button>
+  <button type="button" onclick="navigate('reports');toggleMobileMore(false)">Reports</button>
+  <button type="button" onclick="navigate('team');toggleMobileMore(false)">Team &amp; access</button>
+  <button type="button" onclick="navigate('audit');toggleMobileMore(false)">Audit trail</button>
+  <button type="button" onclick="navigate('settings');toggleMobileMore(false)">Settings</button>
+  <button type="button" onclick="navigate('account');toggleMobileMore(false)">My Account</button>
+</div>
 
 <div id="notifPanel" onclick="event.stopPropagation()"></div>
 <div class="content">
