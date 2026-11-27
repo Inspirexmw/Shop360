@@ -2629,60 +2629,102 @@ html body #page-dashboard .dash-duo-secondary .dash-duo-value{
 }
 
 
-/* Shop360 horizontal top navigation preview */
-.app{display:block;min-height:100vh}
-.sidebar.top-navigation{
-  position:sticky;top:72px;z-index:4;
-  display:block;width:auto;min-height:0;height:auto;
-  padding:0 32px;background:transparent;color:var(--text);
-  border:0;box-shadow:none;
+
+
+/* Shop360 unified horizontal header navigation */
+html body .app{display:block;min-height:100vh}
+html body .shop360-header{
+  position:sticky;top:0;z-index:30;
+  display:grid;grid-template-columns:auto minmax(0,1fr) auto;
+  align-items:center;gap:24px;
+  width:100%;height:76px;min-height:76px;
+  padding:0 32px;margin:0;
+  background:var(--panel);border:0;border-bottom:1px solid var(--line);
+  box-shadow:none;backdrop-filter:none;
 }
-.sidebar.top-navigation .brand,
-.sidebar.top-navigation .side-bottom,
-.sidebar.top-navigation .nav-label,
-.sidebar.top-navigation .sidebar-collapse{display:none!important}
-.sidebar.top-navigation>div:nth-child(2){
-  display:flex;align-items:center;gap:18px;min-width:0;
-  padding:9px 12px;margin:10px 0 0;
-  background:#F7F8FA;border:1px solid #ECEEF2;border-radius:18px;
-  overflow-x:auto;overflow-y:visible;scrollbar-width:none;
-  -webkit-overflow-scrolling:touch;
+html body .header-brand{display:flex;align-items:center;min-width:max-content}
+html body .header-brand .brand{display:flex;align-items:center;gap:9px;padding:0}
+html body .header-brand .logo{width:36px;height:36px;border-radius:10px;flex:none}
+html body .header-brand .logo img{width:100%;height:100%;object-fit:contain}
+html body .header-brand .brand-copy b{display:block;font-size:16px;line-height:1.1;color:var(--ink);letter-spacing:-.45px}
+html body .header-brand .brand-copy small{display:block;margin-top:3px;font-size:9px;line-height:1;color:var(--muted);letter-spacing:.2px}
+html body .nav-viewport{min-width:0;width:100%;overflow-x:auto;overflow-y:visible;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+html body .nav-viewport::-webkit-scrollbar{display:none}
+html body .main-nav{display:flex;align-items:center;justify-content:center;gap:clamp(8px,1.15vw,18px);width:max-content;min-width:100%;white-space:nowrap}
+html body .main-nav>button,
+html body .main-nav .nav-group-toggle{
+  position:relative;display:inline-flex;align-items:center;justify-content:center;
+  flex:0 0 auto;gap:5px;padding:12px 2px;min-height:44px;
+  color:var(--muted);background:transparent;border:0;border-radius:0;
+  font-size:12px;font-weight:650;white-space:nowrap;
 }
-.sidebar.top-navigation>div:nth-child(2)::-webkit-scrollbar{display:none}
-.sidebar.top-navigation .nav{display:flex;align-items:center;gap:4px;flex:0 0 auto}
-.sidebar.top-navigation .nav button{
-  display:inline-flex;align-items:center;gap:8px;white-space:nowrap;
-  padding:10px 13px;border-radius:12px;background:transparent;
-  color:#475467;font-size:13px;font-weight:600;min-height:40px;
+html body .main-nav .ico{display:none!important}
+html body .main-nav>button:hover,
+html body .main-nav .nav-group-toggle:hover{color:var(--brand);background:transparent}
+html body .main-nav>button.active,
+html body .main-nav .nav-group.is-current>.nav-group-toggle{color:var(--brand);background:transparent;box-shadow:none}
+html body .main-nav>button.active:after,
+html body .main-nav .nav-group.is-current>.nav-group-toggle:after{
+  content:"";position:absolute;left:0;right:0;bottom:5px;height:2px;
+  border-radius:2px;background:var(--brand)
 }
-.sidebar.top-navigation .nav button:hover{background:#fff;color:#171717}
-.sidebar.top-navigation .nav button.active{
-  background:#fff;color:#1F01B9;
-  box-shadow:0 1px 3px rgba(16,24,40,.09);
+html body .main-nav .nav-group{position:relative;display:flex;align-items:center;flex:0 0 auto}
+html body .main-nav .nav-group-chevron{font-size:12px;margin-left:1px}
+html body .main-nav .nav-subnav{
+  display:none;position:absolute;top:calc(100% - 1px);left:-12px;z-index:40;
+  min-width:205px;padding:8px;background:var(--panel);
+  border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow-lg,0 12px 30px rgba(16,24,40,.14))
 }
-.sidebar.top-navigation .nav .ico{width:17px;height:17px;color:currentColor}
-.sidebar.top-navigation .nav .ico svg{width:17px;height:17px}
-.sidebar.top-navigation .nav-group{position:relative;flex:0 0 auto}
-.sidebar.top-navigation .nav-group-toggle{white-space:nowrap}
-.sidebar.top-navigation .nav-subnav{
-  display:none;position:absolute;top:calc(100% + 8px);left:0;z-index:20;
-  min-width:210px;padding:7px;background:#fff;border:1px solid #E7EAF0;
-  border-radius:13px;box-shadow:0 12px 30px rgba(16,24,40,.14);
+html body .main-nav .nav-group.is-open .nav-subnav{display:grid;gap:2px}
+html body .main-nav .nav-subnav button{
+  display:flex;justify-content:flex-start;min-height:38px;padding:9px 11px;
+  border-radius:8px;color:var(--ink);font-size:12px
 }
-.sidebar.top-navigation .nav-group.is-open .nav-subnav{display:grid;gap:3px}
-.sidebar.top-navigation .nav-subnav button{width:100%;justify-content:flex-start}
-.sidebar.top-navigation .nav-group.is-open .nav-group-toggle{background:#fff;color:#1F01B9}
-.topbar{z-index:6}
-.content{padding-top:24px}
-@media(max-width:900px){
-  .sidebar.top-navigation{padding:0 18px}
-  .sidebar.top-navigation>div:nth-child(2){gap:8px}
+html body .main-nav .nav-subnav button:hover,
+html body .main-nav .nav-subnav button.active{background:var(--brand2);color:var(--brand)}
+html body .shop360-header .top-actions{display:flex;align-items:center;justify-content:flex-end;gap:12px;min-width:max-content}
+html body .shop360-header .bell,
+html body .shop360-header .header-settings-btn,
+html body .shop360-header .logout-btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:34px;height:34px;padding:0;background:transparent;color:var(--muted);
+  border:0;border-radius:9px;box-shadow:none
+}
+html body .shop360-header .bell:hover,
+html body .shop360-header .header-settings-btn:hover,
+html body .shop360-header .logout-btn:hover{background:var(--soft);color:var(--brand)}
+html body .shop360-header .avatar-btn{width:36px;height:36px;flex:none}
+html body .shop360-header #headerUserInfo{white-space:nowrap}
+html body .sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+html body .shop360-header .mobile-menu{display:none!important}
+@media(max-width:1100px){
+  html body .shop360-header{gap:16px;padding:0 20px}
+  html body .main-nav{justify-content:flex-start;gap:13px}
+  html body .shop360-header .top-actions{gap:8px}
 }
 @media(max-width:720px){
-  .topbar{padding:0 16px}
-  .topbar .mobile-menu{display:none!important}
-  .sidebar.top-navigation{top:64px;padding:0 12px}
-  .sidebar.top-navigation>div:nth-child(2){margin-top:8px;padding:7px 8px;border-radius:16px;gap:4px}
-  .sidebar.top-navigation .nav button{padding:9px 11px;font-size:12px;min-height:38px}
-  .content{padding:20px 16px 40px}
+  html body .shop360-header{
+    grid-template-columns:auto minmax(0,1fr) auto;gap:10px;
+    height:64px;min-height:64px;padding:0 12px
+  }
+  html body .header-brand .brand-copy small{display:none}
+  html body .header-brand .logo{width:32px;height:32px}
+  html body .header-brand .brand-copy b{font-size:14px}
+  html body .main-nav{justify-content:flex-start;gap:13px}
+  html body .main-nav>button,
+  html body .main-nav .nav-group-toggle{font-size:11px;min-height:40px;padding:10px 0}
+  html body .shop360-header .top-actions{gap:5px}
+  html body .shop360-header #headerUserInfo,
+  html body .shop360-header .header-settings-btn,
+  html body .shop360-header .logout-btn{display:none!important}
+  html body .shop360-header .bell{width:30px;height:32px}
+  html body .shop360-header .avatar-btn{width:32px;height:32px}
+  html body .content{padding-top:20px}
+}
+@media(max-width:420px){
+  html body .shop360-header{gap:8px;padding:0 9px}
+  html body .header-brand .brand-copy b{font-size:13px}
+  html body .header-brand .logo{width:29px;height:29px}
+  html body .main-nav{gap:11px}
+  html body .shop360-header .top-actions{gap:3px}
 }
